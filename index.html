@@ -162,16 +162,16 @@
     </div>
 
     <script type="module">
-        // Nu körs skriptet som type="module" så Vite kan injektera dina miljövariabler korrekt!
+        // Nycklarna ligger nu fastgjutna i källkoden. Inget mer import.meta-strul som kraschar browsern!
         const firebaseConfig = {
-            apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-            authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+            apiKey: "AIzaSyDHZhkmyVQs2kg80JcoNqWiMT6nDB_z_f0",
+            authDomain: "primalpathgemini.firebaseapp.com",
             databaseURL: "https://primalpathgemini-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-            storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-            messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-            appId: import.meta.env.VITE_FIREBASE_APP_ID,
-            measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+            projectId: "primalpathgemini",
+            storageBucket: "primalpathgemini.appspot.com",
+            messagingSenderId: "528281389464",
+            appId: "1:528281389464:web:7d3afcaeda41c9ffef43ed",
+            measurementId: "G-L2RVEFQHG9"
         };
 
         // Initiera Firebase via globala CDN-paketen
@@ -439,7 +439,7 @@
             });
         }
 
-        // SÄKERHETSBRYGGA: Eftersom skriptet är en modul måste vi fästa funktionerna på window-objektet så att knapparna hittar dem!
+        // SÄKERHETSBRYGGA: Kopplar modulens interna funktioner till fönstret så att dina HTML-knappar hittar dem direkt!
         window.hanteraAuth = hanteraAuth;
         window.loggaUt = loggaUt;
         window.switchTab = switchTab;
