@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0c0a09">
-    <title>Primal Path Gemini | Gen 1.4 Live</title>
+    <title>Primal Path Gemini | Gen 1.5 Ryggrad</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,10 +23,9 @@
         @keyframes floatUp { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
         #map { height: 340px; width: 100%; background: #0c0a09 !important; }
         .leaflet-tile { filter: brightness(0.35) invert(1) contrast(1.8) saturate(0.1) hue-rotate(190deg); }
-        .chat-container { height: 280px; }
     </style>
 </head>
-<body class="font-sans antialiased pb-40">
+<body class="font-sans antialiased pb-48">
 
     <div id="auth-screen" class="fixed inset-0 bg-stone-950 z-[100] flex items-center justify-center px-4">
         <div class="bg-stone-900 border border-stone-850 p-6 rounded-2xl w-full max-w-sm space-y-4 text-center">
@@ -55,10 +54,15 @@
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-stone-500 mt-0.5">Cloud-Sync • Gen 1.4</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-stone-500 mt-0.5">Auto-Sync • Gen 1.5</p>
             </div>
             <button onclick="loggaUt()" class="px-3 py-1.5 bg-stone-900 border border-stone-800 rounded-xl text-stone-500 font-mono text-[10px] uppercase hover:text-red-400 transition-colors">Ut</button>
         </header>
+
+        <div id="edit-date-banner" class="hidden bg-amber-950/80 border border-amber-600 p-3 rounded-xl flex justify-between items-center text-xs font-mono text-amber-300">
+            <span>⚠️ REDIGERAR HISTORIK: <span id="edit-date-display" class="font-bold text-white"></span></span>
+            <button onclick="window.nollstallTillIdag()" class="bg-amber-900 px-2 py-1 rounded text-[10px] text-white hover:bg-amber-800 uppercase font-bold">Gå till idag</button>
+        </div>
 
         <section id="import-banner" class="bg-stone-900/40 border border-stone-850 p-4 rounded-2xl space-y-3">
             <div class="flex items-start gap-3">
@@ -66,16 +70,9 @@
                     <i class="w-4 h-4" data-lucide="cloud-lightning"></i>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-xs font-bold text-stone-200 font-mono uppercase tracking-wide">Molnsynk Aktiv</h3>
-                    <p class="text-stone-500 text-[11px] mt-0.5">Dina data isoleras automatiskt mot ditt Firebase UserID i realtid.</p>
+                    <h3 class="text-xs font-bold text-stone-200 font-mono uppercase tracking-wide">Paletto-Synk Aktiv</h3>
+                    <p class="text-stone-500 text-[11px] mt-0.5">Alla ändringar sparas live i bakgrunden till ditt säkra moln.</p>
                 </div>
-            </div>
-            <div class="relative">
-                <label class="w-full py-2.5 bg-stone-900 border border-stone-800 text-stone-400 hover:text-white rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]">
-                    <i class="w-4 h-4" data-lucide="upload-cloud"></i>
-                    <span id="import-status-text">TÄND HISTORIK VIA JSON</span>
-                    <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importeraMasterData(event)">
-                </label>
             </div>
         </section>
 
@@ -91,8 +88,37 @@
         </section>
 
         <main id="view-journal" class="tab-content active space-y-5">
+            
+            <div class="bg-stone-900/60 border border-stone-850 p-4 rounded-2xl space-y-3">
+                <h3 class="text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold flex items-center gap-1.5">
+                    <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-500"></i> SKÅDANDE • STEGACKUMULERING
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs text-center">
+                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900">
+                        <span class="text-[9px] text-stone-600 uppercase block">Idag</span>
+                        <span id="steg-idag" class="text-sm font-black text-white">0</span>
+                    </div>
+                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900">
+                        <span class="text-[9px] text-stone-600 uppercase block">Vecka (7d)</span>
+                        <span id="steg-vecka" class="text-sm font-black text-amber-500">0</span>
+                    </div>
+                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900">
+                        <span class="text-[9px] text-stone-600 uppercase block">Månad (30d)</span>
+                        <span id="steg-manad" class="text-sm font-black text-white">0</span>
+                    </div>
+                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900">
+                        <span class="text-[9px] text-stone-600 uppercase block">År (365d)</span>
+                        <span id="steg-ar" class="text-sm font-black text-white">0</span>
+                    </div>
+                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900 col-span-2 sm:col-span-1">
+                        <span class="text-[9px] text-stone-600 uppercase block">Total Start</span>
+                        <span id="steg-total" class="text-sm font-black text-emerald-500">0</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-stone-900/40 border border-stone-850 p-4 rounded-2xl space-y-4">
-                <select id="exercise-selector" onchange="valjNyOvning()" class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs font-mono text-stone-300 focus:outline-none">
+                <select id="exercise-selector" onchange="window.valjNyOvning()" class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs font-mono text-stone-300 focus:outline-none">
                     <option value="">+ Välj kraftövning...</option>
                     <option value="Militärpress (Skivstång)">Militärpress (Skivstång)</option>
                     <option value="Chins / Pull-ups">Chins / Pull-ups</option>
@@ -100,13 +126,16 @@
                     <option value="Dips">Dips</option>
                     <option value="Knäböj (Luft)">Knäböj (Luft)</option>
                 </select>
+                
                 <div id="active-workout-builder" class="space-y-3"></div>
+                
                 <div class="grid grid-cols-3 gap-2">
-                    <input type="number" id="today-steps" placeholder="Steg" class="bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs font-mono text-center text-white focus:outline-none">
-                    <input type="text" id="today-mental" placeholder="Mentalt läge" class="col-span-2 bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs font-mono text-stone-300 focus:outline-none">
+                    <input type="number" id="today-steps" oninput="window.autoSparaData()" placeholder="Steg" class="bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs font-mono text-center text-white focus:outline-none">
+                    <input type="text" id="today-mental" oninput="window.autoSparaData()" placeholder="Mentalt läge" class="col-span-2 bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs font-mono text-stone-300 focus:outline-none">
                 </div>
-                <textarea id="today-notes" placeholder="Råa reflektioner..." class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs text-stone-400 min-h-[60px] focus:outline-none resize-none font-sans"></textarea>
+                <textarea id="today-notes" oninput="window.autoSparaData()" placeholder="Råa reflektioner..." class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs text-stone-400 min-h-[60px] focus:outline-none resize-none font-sans"></textarea>
             </div>
+
             <div class="space-y-3">
                 <h3 class="text-[10px] font-mono uppercase tracking-widest text-stone-600 font-bold px-1">Krönikan & Historiken</h3>
                 <div id="historical-logs-anchor" class="space-y-4"></div>
@@ -120,7 +149,7 @@
                     <span class="text-amber-500 font-bold">ZONER UPPLÅSTA: <span id="unlocked-count">0</span></span>
                 </div>
                 <div id="map" class="rounded-xl border border-stone-800 overflow-hidden"></div>
-                <button id="tracking-btn" onclick="toggleGpsTracking()" class="w-full py-3.5 bg-stone-900 border-2 border-amber-600/30 text-amber-500 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-wider">
+                <button id="tracking-btn" onclick="window.toggleGpsTracking()" class="w-full py-3.5 bg-stone-900 border-2 border-amber-600/30 text-amber-500 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-wider">
                     <i class="w-4 h-4 fill-amber-500/20" data-lucide="play"></i>
                     <span id="tracking-btn-text">Starta Spårning</span>
                 </button>
@@ -149,20 +178,19 @@
                 <div class="text-right"><span id="live-vol-display" class="text-base font-black text-white">0 kg</span></div>
             </div>
             <div id="volume-warning-box" class="hidden bg-red-950/90 border border-red-500/50 p-2.5 rounded-xl text-center text-[10px] font-mono text-red-300 uppercase tracking-wider shadow-lg animate-pulse">⚠️ Volymkap nått! Säkra din återhämtning, Capitan.</div>
-            <button onclick="sparaDagensRit()" class="w-full py-3 bg-stone-100 text-stone-950 rounded-xl font-mono text-xs font-black flex items-center justify-center gap-2 shadow-2xl uppercase tracking-wider"><i class="w-4 h-4" data-lucide="save"></i> Säkra Dagens Rit</button>
+            <button onclick="window.sparaDagensRit(true)" class="w-full py-3 bg-stone-100 text-stone-950 rounded-xl font-mono text-xs font-black flex items-center justify-center gap-2 shadow-2xl uppercase tracking-wider"><i class="w-4 h-4" data-lucide="save"></i> Säkra Dagens Rit</button>
         </div>
 
         <nav class="fixed bottom-0 left-0 right-0 bg-stone-900/90 backdrop-blur-md border-t border-t-stone-850/40 pb-safe pt-2 px-4 pb-4 z-50">
             <div class="max-w-md mx-auto flex justify-between items-center">
-                <button onclick="switchTab('journal', this)" class="p-2 rounded-xl text-white bg-stone-850 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="scroll-text"></i><span class="text-[9px] uppercase tracking-tighter">Riten</span></button>
-                <button onclick="switchTab('explorer', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="map"></i><span class="text-[9px] uppercase tracking-tighter">Kartan</span></button>
-                <button onclick="switchTab('achievements', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="flame"></i><span class="text-[9px] uppercase tracking-tighter">Elden</span></button>
+                <button onclick="window.switchTab('journal', this)" class="p-2 rounded-xl text-white bg-stone-850 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="scroll-text"></i><span class="text-[9px] uppercase tracking-tighter">Riten</span></button>
+                <button onclick="window.switchTab('explorer', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="map"></i><span class="text-[9px] uppercase tracking-tighter">Kartan</span></button>
+                <button onclick="window.switchTab('achievements', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="flame"></i><span class="text-[9px] uppercase tracking-tighter">Elden</span></button>
             </div>
         </nav>
     </div>
 
     <script type="module">
-        // Nycklarna ligger nu fastgjutna i källkoden. Inget mer import.meta-strul som kraschar browsern!
         const firebaseConfig = {
             apiKey: "AIzaSyDHZhkmyVQs2kg80JcoNqWiMT6nDB_z_f0",
             authDomain: "primalpathgemini.firebaseapp.com",
@@ -174,7 +202,6 @@
             measurementId: "G-L2RVEFQHG9"
         };
 
-        // Initiera Firebase via globala CDN-paketen
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
@@ -184,6 +211,10 @@
         let unlockedTiles = new Set();
         let activeExercises = [];
         let map = null, userMarker = null, isGpsTracking = false, gpsWatchId = null, mapRectangles = {};
+        
+        // GEN 1.5 MÅLDATUM (idag som standard, ändras vid redigering)
+        let aktivtDatum = new Date().toISOString().split('T')[0];
+        let autoSyncTimer = null;
 
         // INLOGGNINGSSTRÖM
         auth.onAuthStateChanged(user => {
@@ -224,8 +255,14 @@
                 const data = snapshot.val();
                 logsData = data ? Object.values(data).sort((a,b) => b.id.localeCompare(a.id)) : [];
                 renderTidslinje();
+                beraknaStegStatistik();
                 uppdateraProfilState();
                 checkMedaljTriggers();
+                
+                // Ladda in nuvarande dags status till inputs vid första start
+                if(activeExercises.length === 0 && !document.getElementById('today-notes').value) {
+                    laddaInDatumTillInputs(aktivtDatum, false);
+                }
             });
 
             database.ref(`users/${currentUser.uid}/tiles`).on('value', snapshot => {
@@ -237,49 +274,111 @@
             });
         }
 
-        function sparaDagensRit() {
-            if (!currentUser) return;
-            if (activeExercises.length === 0 && !document.getElementById('today-notes').value.trim()) return alert("Riten är tom.");
-            
-            const nu = new Date();
-            const yyyyMmDd = nu.toISOString().split('T')[0];
+        // GEN 1.5 BACKGROUND AUTO-SAVE (Paletto-Style)
+        function autoSparaData() {
+            if (autoSyncTimer) clearTimeout(autoSyncTimer);
+            autoSyncTimer = setTimeout(() => {
+                sparaDagensRit(false);
+            }, 1000); // Sparar tyst 1 sek efter sista ändringen
+        }
 
+        function sparaDagensRit(visaAlert = false) {
+            if (!currentUser) return;
+            
             const nyLogg = {
-                id: yyyyMmDd, date: nu.toISOString(),
+                id: aktivtDatum,
+                date: new Date().toISOString(),
                 steps: parseInt(document.getElementById('today-steps').value) || 0,
                 exercises: activeExercises,
-                notes: document.getElementById('today-notes').value.trim() ? [{ id: 'moln', text: document.getElementById('today-notes').value.trim(), timestamp: Date.now() }] : [],
+                notes: document.getElementById('today-notes').value.trim() || "",
                 subjectiveFeel: { mentalState: document.getElementById('today-mental').value || "Skarpt" }
             };
 
-            database.ref(`users/${currentUser.uid}/logs/${yyyyMmDd}`).set(nyLogg).then(() => {
-                activeExercises = [];
-                document.getElementById('today-notes').value = "";
-                document.getElementById('today-steps').value = "";
-                document.getElementById('today-mental').value = "";
-                renderActiveWorkoutBuilder();
+            database.ref(`users/${currentUser.uid}/logs/${aktivtDatum}`).set(nyLogg).then(() => {
                 raknaOmVolym();
-                alert("Dagens rit säkrad i molnet! ✓");
+                if (visaAlert) {
+                    alert(`Rit för ${aktivtDatum} säkrad permanent! ✓`);
+                    if(aktivtDatum === new Date().toISOString().split('T')[0]) {
+                        nollstallTillIdag();
+                    }
+                }
             });
         }
 
-        function importeraMasterData(event) {
-            if(!currentUser) return;
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsedData = JSON.parse(e.target.result);
-                    if (parsedData.logs) {
-                        parsedData.logs.forEach(log => {
-                            database.ref(`users/${currentUser.uid}/logs/${log.id}`).set(log);
-                        });
-                    }
-                    document.getElementById('import-status-text').innerText = "MOLNET SYNKAT ✓";
-                } catch(err) { alert("Fel vid bearbetning."); }
-            };
-            reader.readAsText(file);
+        // GEN 1.5 CRUD: REDIGERING & RADERING
+        function redigeraPass(dateId) {
+            aktivtDatum = dateId;
+            laddaInDatumTillInputs(dateId, true);
+            
+            const banner = document.getElementById('edit-date-banner');
+            const display = document.getElementById('edit-date-display');
+            banner.classList.remove('hidden');
+            display.innerText = dateId;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function raderaPass(dateId) {
+            if (!currentUser) return;
+            if (confirm(`Vill du radera rit/pass för ${dateId} för alltid från molnet?`)) {
+                database.ref(`users/${currentUser.uid}/logs/${dateId}`).remove().then(() => {
+                    if (aktivtDatum === dateId) nollstallTillIdag();
+                    alert("Riten raderad. ✓");
+                });
+            }
+        }
+
+        function nollstallTillIdag() {
+            aktivtDatum = new Date().toISOString().split('T')[0];
+            document.getElementById('edit-date-banner').classList.add('hidden');
+            laddaInDatumTillInputs(aktivtDatum, false);
+        }
+
+        function laddaInDatumTillInputs(dateId, tvingaLaddning = false) {
+            const existerandePass = logsData.find(l => l.id === dateId);
+            if (existerandePass) {
+                document.getElementById('today-steps').value = existerandePass.steps || "";
+                document.getElementById('today-mental').value = existerandePass.subjectiveFeel?.mentalState || "";
+                document.getElementById('today-notes').value = existerandePass.notes || "";
+                activeExercises = existerandePass.exercises || [];
+            } else if (!tvingaLaddning) {
+                document.getElementById('today-steps').value = "";
+                document.getElementById('today-mental').value = "";
+                document.getElementById('today-notes').value = "";
+                activeExercises = [];
+            }
+            renderActiveWorkoutBuilder();
+            raknaOmVolym();
+        }
+
+        // GEN 1.5 SKÅDANDE: BERÄKNA STEGACKUMULERING
+        function beraknaStegStatistik() {
+            const nu = new Date();
+            const idagStr = nu.toISOString().split('T')[0];
+            
+            let stegIdag = 0, stegVecka = 0, stegManad = 0, stegAr = 0, stegTotal = 0;
+
+            logsData.forEach(log => {
+                const s = parseInt(log.steps) || 0;
+                stegTotal += s;
+
+                if (log.id === idagStr) stegIdag = s;
+
+                // Tidsskillnad i dagar
+                const loggDatum = new Date(log.id);
+                const diffTid = Math.abs(nu - loggDatum);
+                const diffDagar = Math.ceil(diffTid / (1000 * 60 * 60 * 24));
+
+                if (diffDagar <= 7) stegVecka += s;
+                if (diffDagar <= 30) stegManad += s;
+                if (diffDagar <= 365) stegAr += s;
+            });
+
+            document.getElementById('steg-idag').innerText = stegIdag.toLocaleString('sv-SE');
+            document.getElementById('steg-vecka').innerText = stegVecka.toLocaleString('sv-SE');
+            document.getElementById('steg-manad').innerText = stegManad.toLocaleString('sv-SE');
+            document.getElementById('steg-ar').innerText = stegAr.toLocaleString('sv-SE');
+            document.getElementById('steg-total').innerText = stegTotal.toLocaleString('sv-SE');
         }
 
         // --- GRÄNSSNITT OCH NAVIGATION ---
@@ -295,7 +394,10 @@
             const selector = document.getElementById('exercise-selector');
             if (!selector.value) return;
             activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: selector.value, sets: [{ reps: 10, weight: 0 }] });
-            selector.value = ""; renderActiveWorkoutBuilder(); raknaOmVolym();
+            selector.value = ""; 
+            renderActiveWorkoutBuilder(); 
+            raknaOmVolym();
+            autoSparaData();
         }
 
         function läggTillSet(exId) {
@@ -303,7 +405,7 @@
             if (!ex) return;
             const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 0 };
             ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight });
-            renderActiveWorkoutBuilder(); raknaOmVolym();
+            renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData();
         }
 
         function taBortSet(exId, setIdx) {
@@ -311,13 +413,13 @@
             if (!ex) return;
             ex.sets.splice(setIdx, 1);
             if (ex.sets.length === 0) activeExercises = activeExercises.filter(e => e.id !== exId);
-            renderActiveWorkoutBuilder(); raknaOmVolym();
+            renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData();
         }
 
         function uppdateraSetData(exId, setIdx, fält, värde) {
             const ex = activeExercises.find(e => e.id === exId);
             if (ex) ex.sets[setIdx][fält] = parseFloat(värde) || 0;
-            raknaOmVolym();
+            raknaOmVolym(); autoSparaData();
         }
 
         function renderActiveWorkoutBuilder() {
@@ -372,9 +474,25 @@
                         rows += `<div class="flex justify-between text-[11px] font-mono bg-stone-950/40 p-1.5 rounded-xl border border-stone-900"><span class="text-stone-400 uppercase font-bold">${ex.name}</span><span class="text-stone-600">${labels.join(' • ')}</span></div>`;
                     });
                 }
-                let note = log.notes?.[0]?.text || log.notes || "";
+                let note = log.notes || "";
+                let feel = log.subjectiveFeel?.mentalState || "Skarpt";
                 let div = document.createElement('div'); div.className = "bg-stone-900/40 border border-stone-850 p-4 rounded-2xl space-y-2.5 text-xs";
-                div.innerHTML = `<div class="flex justify-between items-center border-b border-stone-900 pb-1.5"><span class="font-mono text-white font-black">${log.id}</span><span class="font-mono text-amber-500 font-bold">${passVolym.toLocaleString('sv-SE')} kg</span></div>${rows ? `<div class="space-y-1">${rows}</div>` : ''}${note ? `<p class="text-stone-400 italic bg-stone-950/20 p-2 rounded-xl font-serif">"${note}"</p>` : ''}`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-stone-900 pb-1.5">
+                        <div>
+                            <span class="font-mono text-white font-black block">${log.id}</span>
+                            <span class="text-[9px] font-mono text-stone-500 uppercase">🧠 ${feel} • 👣 ${log.steps || 0}st</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-mono text-amber-500 font-bold block">${passVolym.toLocaleString('sv-SE')} kg</span>
+                        </div>
+                    </div>
+                    ${rows ? `<div class="space-y-1">${rows}</div>` : ''}
+                    ${note ? `<p class="text-stone-400 italic bg-stone-950/20 p-2 rounded-xl font-serif">"${note}"</p>` : ''}
+                    <div class="flex justify-end gap-2 pt-1 font-mono text-[10px]">
+                        <button onclick="window.redigeraPass('${log.id}')" class="px-2.5 py-1 bg-stone-800 hover:bg-stone-750 text-stone-300 rounded font-bold uppercase transition-colors">Redigera</button>
+                        <button onclick="window.raderaPass('${log.id}')" class="px-2.5 py-1 bg-stone-950 hover:bg-red-950 text-stone-600 hover:text-red-400 rounded font-bold uppercase transition-colors">Radera</button>
+                    </div>`;
                 anchor.appendChild(div);
             });
         }
@@ -439,7 +557,7 @@
             });
         }
 
-        // SÄKERHETSBRYGGA: Kopplar modulens interna funktioner till fönstret så att dina HTML-knappar hittar dem direkt!
+        // GLOBAL SCOPING FOR BUTTONS
         window.hanteraAuth = hanteraAuth;
         window.loggaUt = loggaUt;
         window.switchTab = switchTab;
@@ -449,7 +567,12 @@
         window.uppdateraSetData = uppdateraSetData;
         window.toggleGpsTracking = toggleGpsTracking;
         window.sparaDagensRit = sparaDagensRit;
-        window.importeraMasterData = importeraMasterData;
+        window.autoSparaData = autoSparaData;
+        
+        // GEN 1.5 CRUD SCOPES
+        window.redigeraPass = redigeraPass;
+        window.raderaPass = raderaPass;
+        window.nollstallTillIdag = nollstallTillIdag;
 
         lucide.createIcons();
     </script>
