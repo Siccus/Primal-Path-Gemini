@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#0c0a09">
-    <title>Primal Path Gemini | Gen 1.5 Ryggrad</title>
+    <meta name="theme-color" content="#031410">
+    <title>Primal Path Gemini | Gen 1.5 Live</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -17,31 +17,32 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
     <style>
-        body { background-color: #0c0a09; color: #e7e5e4; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #031410; color: #e7e5e4; -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: floatUp 0.25s ease-out forwards; }
         @keyframes floatUp { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
-        #map { height: 340px; width: 100%; background: #0c0a09 !important; }
-        .leaflet-tile { filter: brightness(0.35) invert(1) contrast(1.8) saturate(0.1) hue-rotate(190deg); }
+        #map { height: 340px; width: 100%; background: #031410 !important; }
+        .leaflet-tile { filter: brightness(0.35) invert(1) contrast(1.8) saturate(0.1) hue-rotate(120deg); }
+        .chat-container { height: 380px; }
     </style>
 </head>
-<body class="font-sans antialiased pb-48">
+<body class="font-sans antialiased pb-28">
 
-    <div id="auth-screen" class="fixed inset-0 bg-stone-950 z-[100] flex items-center justify-center px-4">
-        <div class="bg-stone-900 border border-stone-850 p-6 rounded-2xl w-full max-w-sm space-y-4 text-center">
+    <div id="auth-screen" class="fixed inset-0 bg-[#020e0b] z-[100] flex items-center justify-center px-4">
+        <div class="bg-[#051c16] border border-[#113a30] p-6 rounded-2xl w-full max-w-sm space-y-4 text-center shadow-2xl">
             <div>
                 <h2 class="text-lg font-black tracking-tighter text-white font-mono flex items-center justify-center gap-2">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL CRYPT
                 </h2>
-                <p class="text-[10px] font-mono uppercase tracking-widest text-stone-500 mt-1">Säkra din livslinje separat</p>
+                <p class="text-[10px] font-mono uppercase tracking-widest text-emerald-600 mt-1">Säkra din livslinje separat</p>
             </div>
             <div class="space-y-2 text-left font-mono text-xs">
-                <input type="email" id="auth-email" placeholder="Din e-postadress" class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-white focus:outline-none focus:border-stone-700">
-                <input type="password" id="auth-password" placeholder="Ditt lösenord" class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-white focus:outline-none focus:border-stone-700">
+                <input type="email" id="auth-email" placeholder="Din e-postadress" class="w-full bg-[#031410] border border-[#113a30] rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500">
+                <input type="password" id="auth-password" placeholder="Ditt lösenord" class="w-full bg-[#031410] border border-[#113a30] rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500">
             </div>
             <div class="grid grid-cols-2 gap-2 font-mono text-xs pt-1">
-                <button onclick="hanteraAuth('LOGGA_IN')" class="py-3 bg-stone-100 hover:bg-white text-stone-950 font-bold rounded-xl transition-all">LOGGA IN</button>
-                <button onclick="hanteraAuth('SKAPA_KONTO')" class="py-3 bg-stone-950 border border-stone-800 hover:border-stone-700 text-stone-300 rounded-xl transition-all">SKAPA KONTO</button>
+                <button onclick="window.hanteraAuth('LOGGA_IN')" class="py-3 bg-stone-100 hover:bg-white text-stone-950 font-bold rounded-xl transition-all">LOGGA IN</button>
+                <button onclick="window.hanteraAuth('SKAPA_KONTO')" class="py-3 bg-[#031410] border border-[#113a30] hover:border-emerald-800 text-stone-300 rounded-xl transition-all">SKAPA KONTO</button>
             </div>
             <p id="auth-error" class="text-red-400 text-[10px] font-mono uppercase tracking-wide min-h-[15px]"></p>
         </div>
@@ -49,107 +50,177 @@
 
     <div class="max-w-md mx-auto px-4 pt-6 space-y-5">
         
-        <header class="flex justify-between items-center border-b border-stone-900 pb-3">
+        <header class="flex justify-between items-center border-b border-[#09261f] pb-3">
             <div>
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-stone-500 mt-0.5">Auto-Sync • Gen 1.5</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-600 mt-0.5">AUTO-SYNC • GEN 1.5 LIVE</p>
             </div>
-            <button onclick="loggaUt()" class="px-3 py-1.5 bg-stone-900 border border-stone-800 rounded-xl text-stone-500 font-mono text-[10px] uppercase hover:text-red-400 transition-colors">Ut</button>
+            <button onclick="window.loggaUt()" class="px-3 py-1.5 bg-[#051c16] border border-[#113a30] rounded-xl text-stone-400 font-mono text-[10px] uppercase hover:text-red-400 transition-colors">Ut</button>
         </header>
 
-        <div id="edit-date-banner" class="hidden bg-amber-950/80 border border-amber-600 p-3 rounded-xl flex justify-between items-center text-xs font-mono text-amber-300">
+        <div id="edit-date-banner" class="hidden bg-amber-950/80 border border-amber-600 p-3 rounded-xl flex justify-between items-center text-xs font-mono text-amber-300 shadow-xl">
             <span>⚠️ REDIGERAR HISTORIK: <span id="edit-date-display" class="font-bold text-white"></span></span>
             <button onclick="window.nollstallTillIdag()" class="bg-amber-900 px-2 py-1 rounded text-[10px] text-white hover:bg-amber-800 uppercase font-bold">Gå till idag</button>
         </div>
 
-        <section id="import-banner" class="bg-stone-900/40 border border-stone-850 p-4 rounded-2xl space-y-3">
-            <div class="flex items-start gap-3">
-                <div class="p-2 bg-amber-500/10 rounded-xl text-amber-500 mt-0.5">
-                    <i class="w-4 h-4" data-lucide="cloud-lightning"></i>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-xs font-bold text-stone-200 font-mono uppercase tracking-wide">Paletto-Synk Aktiv</h3>
-                    <p class="text-stone-500 text-[11px] mt-0.5">Alla ändringar sparas live i bakgrunden till ditt säkra moln.</p>
-                </div>
+        <main id="view-rit" class="tab-content active space-y-4">
+            <div class="space-y-1">
+                <h2 class="text-xl font-black tracking-tight text-white">Dagens Rit</h2>
+                <p class="text-xs text-stone-400">Hedra templet med handling.</p>
             </div>
-        </section>
 
-        <section id="profile-snapshot" class="hidden bg-stone-900/20 border border-stone-900 p-4 rounded-2xl grid grid-cols-2 gap-4 font-mono text-xs">
-            <div class="border-r border-stone-900/60 pr-2">
-                <span class="text-[10px] text-stone-600 uppercase block">Biomassa</span>
-                <span id="prof-weight" class="text-sm font-bold text-white">60 kg</span>
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-2">
+                <label class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-2">
+                    <i data-lucide="footprints" class="w-4 h-4 text-emerald-500"></i> Vandring (Dagens Steg)
+                </label>
+                <input type="number" id="today-steps" oninput="window.autoSparaData()" placeholder="0" class="w-full bg-[#031410] border border-[#113a30] rounded-xl p-3 text-white font-mono text-base focus:outline-none focus:border-emerald-500">
             </div>
-            <div>
-                <span class="text-[10px] text-stone-600 uppercase block">Titanfixering</span>
-                <span id="prof-injury" class="text-stone-400 block truncate font-sans text-[11px]">Ingen</span>
-            </div>
-        </section>
 
-        <main id="view-journal" class="tab-content active space-y-5">
-            
-            <div class="bg-stone-900/60 border border-stone-850 p-4 rounded-2xl space-y-3">
-                <h3 class="text-[10px] font-mono uppercase tracking-widest text-stone-400 font-bold flex items-center gap-1.5">
-                    <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-500"></i> SKÅDANDE • STEGACKUMULERING
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-4">
+                <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-2 border-b border-[#113a30] pb-2">
+                    <i data-lucide="sun" class="w-4 h-4 text-amber-500"></i> Inre Balans
                 </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs text-center">
-                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900">
-                        <span class="text-[9px] text-stone-600 uppercase block">Idag</span>
-                        <span id="steg-idag" class="text-sm font-black text-white">0</span>
+                
+                <div class="space-y-1">
+                    <div class="flex justify-between font-mono text-xs">
+                        <span class="text-stone-400 font-bold uppercase tracking-wider">Livskraft</span>
+                        <span class="text-white font-black"><span id="val-livskraft">8</span> / 12</span>
                     </div>
-                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900">
-                        <span class="text-[9px] text-stone-600 uppercase block">Vecka (7d)</span>
-                        <span id="steg-vecka" class="text-sm font-black text-amber-500">0</span>
+                    <input type="range" id="slider-livskraft" min="1" max="12" value="8" oninput="document.getElementById('val-livskraft').innerText=this.value; window.autoSparaData();" class="w-full accent-amber-500 h-1.5 bg-[#031410] rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="space-y-1">
+                    <div class="flex justify-between font-mono text-xs">
+                        <span class="text-stone-400 font-bold uppercase tracking-wider">Drömmar</span>
+                        <span class="text-white font-black"><span id="val-drommar">8</span> / 12</span>
                     </div>
-                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900">
-                        <span class="text-[9px] text-stone-600 uppercase block">Månad (30d)</span>
-                        <span id="steg-manad" class="text-sm font-black text-white">0</span>
+                    <input type="range" id="slider-drommar" min="1" max="12" value="8" oninput="document.getElementById('val-drommar').innerText=this.value; window.autoSparaData();" class="w-full accent-indigo-500 h-1.5 bg-[#031410] rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="space-y-1">
+                    <div class="flex justify-between font-mono text-xs">
+                        <span class="text-stone-400 font-bold uppercase tracking-wider">Inre Väder</span>
+                        <span class="text-white font-black"><span id="val-veder">9</span> / 12</span>
                     </div>
-                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900">
-                        <span class="text-[9px] text-stone-600 uppercase block">År (365d)</span>
-                        <span id="steg-ar" class="text-sm font-black text-white">0</span>
-                    </div>
-                    <div class="bg-stone-950 p-2 rounded-xl border border-stone-900 col-span-2 sm:col-span-1">
-                        <span class="text-[9px] text-stone-600 uppercase block">Total Start</span>
-                        <span id="steg-total" class="text-sm font-black text-emerald-500">0</span>
-                    </div>
+                    <input type="range" id="slider-veder" min="1" max="12" value="9" oninput="document.getElementById('val-veder').innerText=this.value; window.autoSparaData();" class="w-full accent-slate-400 h-1.5 bg-[#031410] rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="space-y-1 pt-2">
+                    <textarea id="today-notes" oninput="window.autoSparaData()" placeholder="Övriga tankar..." class="w-full bg-[#031410] border border-[#113a30] rounded-xl p-3 text-xs text-stone-300 min-h-[80px] focus:outline-none resize-none font-sans"></textarea>
                 </div>
             </div>
 
-            <div class="bg-stone-900/40 border border-stone-850 p-4 rounded-2xl space-y-4">
-                <select id="exercise-selector" onchange="window.valjNyOvning()" class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs font-mono text-stone-300 focus:outline-none">
-                    <option value="">+ Välj kraftövning...</option>
-                    <option value="Militärpress (Skivstång)">Militärpress (Skivstång)</option>
-                    <option value="Chins / Pull-ups">Chins / Pull-ups</option>
-                    <option value="Armhävning (Standard)">Armhävning (Standard)</option>
-                    <option value="Dips">Dips</option>
-                    <option value="Knäböj (Luft)">Knäböj (Luft)</option>
-                </select>
-                
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-black text-white">Prövningar</h3>
+                    <select id="exercise-selector" onchange="window.valjNyOvning()" class="bg-[#b85303] hover:bg-orange-700 text-white font-mono text-xs font-bold py-2 px-3 rounded-xl focus:outline-none cursor-pointer transition-colors">
+                        <option value="">+ Lägg till kraft...</option>
+                        <option value="Militärpress">Militärpress</option>
+                        <option value="Forecarm Curls">Forecarm Curls</option>
+                        <option value="Bicep-Curls - Hantel">Bicep-Curls - Hantel</option>
+                        <option value="Chins / Pull-ups">Chins / Pull-ups</option>
+                        <option value="Dips">Dips</option>
+                    </select>
+                </div>
                 <div id="active-workout-builder" class="space-y-3"></div>
-                
-                <div class="grid grid-cols-3 gap-2">
-                    <input type="number" id="today-steps" oninput="window.autoSparaData()" placeholder="Steg" class="bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs font-mono text-center text-white focus:outline-none">
-                    <input type="text" id="today-mental" oninput="window.autoSparaData()" placeholder="Mentalt läge" class="col-span-2 bg-stone-950 border border-stone-800 rounded-xl p-2.5 text-xs font-mono text-stone-300 focus:outline-none">
-                </div>
-                <textarea id="today-notes" oninput="window.autoSparaData()" placeholder="Råa reflektioner..." class="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-xs text-stone-400 min-h-[60px] focus:outline-none resize-none font-sans"></textarea>
             </div>
 
-            <div class="space-y-3">
-                <h3 class="text-[10px] font-mono uppercase tracking-widest text-stone-600 font-bold px-1">Krönikan & Historiken</h3>
-                <div id="historical-logs-anchor" class="space-y-4"></div>
+            <div class="pt-2">
+                <button onclick="window.sparaDagensRit(true)" class="w-full py-3.5 bg-stone-100 hover:bg-white text-stone-950 rounded-xl font-mono text-xs font-black flex items-center justify-center gap-2 shadow-2xl uppercase tracking-wider transition-all">
+                    <i class="w-4 h-4" data-lucide="check-circle"></i> Bekräfta Rit
+                </button>
+            </div>
+        </main>
+
+        <main id="view-journal" class="tab-content space-y-4">
+            <div class="space-y-1">
+                <h2 class="text-xl font-black tracking-tight text-white">Journalboken</h2>
+                <p class="text-xs text-stone-400">Din träningshistoria.</p>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-1 bg-[#051c16] p-1 rounded-xl border border-[#113a30] text-center font-mono text-xs">
+                <button class="py-1.5 bg-[#113a30] text-white rounded-lg font-bold">Dag</button>
+                <button class="py-1.5 text-stone-500 cursor-not-allowed">Vecka</button>
+                <button class="py-1.5 text-stone-500 cursor-not-allowed">Månad</button>
+            </div>
+
+            <div id="historical-logs-anchor" class="space-y-4"></div>
+        </main>
+
+        <main id="view-skadande" class="tab-content space-y-4">
+            <div class="space-y-1">
+                <h2 class="text-xl font-black tracking-tight text-white">Skådande</h2>
+                <p class="text-xs text-stone-400">Biomekanisk analys & Mönster.</p>
+            </div>
+
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-2">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="activity" class="w-4 h-4 text-red-500"></i> Beredskap (ACWR)</h3>
+                        <p class="text-[10px] text-stone-500 uppercase tracking-wider mt-0.5">Skaderisk-monitor</p>
+                    </div>
+                    <span class="text-xl font-mono font-black text-red-500" id="acwr-display">3.61</span>
+                </div>
+                <p class="text-red-300 font-mono text-[10px] uppercase bg-red-950/40 p-2 rounded-lg border border-red-900/30 animate-pulse">⚠️ Hög riskzon! Akut belastning överstiger tålighet markant.</p>
+            </div>
+
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-2">
+                <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="trending-up" class="w-4 h-4 text-amber-500"></i> Mekanisk Belastning (Effektiv Volym)</h3>
+                <div class="h-16 bg-[#031410] border border-[#113a30] rounded-xl flex items-center justify-center text-stone-600 font-mono text-[10px] uppercase tracking-widest">
+                    [ Volymgraf laddas live ]
+                </div>
+                <p class="text-[9px] text-stone-600 font-mono italic px-1">*Inkluderar Dempster-korrigering för kroppsviktsövningar (t.ex. 95% BW för Chins).</p>
+            </div>
+
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-3">
+                <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4 text-emerald-500"></i> Ledbelastning & Stegackumulering</h3>
+                <div class="grid grid-cols-2 gap-2 font-mono text-xs text-center">
+                    <div class="bg-[#031410] p-2.5 rounded-xl border border-[#113a30]">
+                        <span class="text-[9px] text-stone-500 uppercase block mb-0.5">Idag</span>
+                        <span id="steg-idag" class="text-base font-black text-white">0</span>
+                    </div>
+                    <div class="bg-[#031410] p-2.5 rounded-xl border border-[#113a30]">
+                        <span class="text-[9px] text-stone-500 uppercase block mb-0.5">Vecka (7d)</span>
+                        <span id="steg-vecka" class="text-base font-black text-amber-500">0</span>
+                    </div>
+                    <div class="bg-[#031410] p-2.5 rounded-xl border border-[#113a30]">
+                        <span class="text-[9px] text-stone-500 uppercase block mb-0.5">Månad (30d)</span>
+                        <span id="steg-manad" class="text-base font-black text-white">0</span>
+                    </div>
+                    <div class="bg-[#031410] p-2.5 rounded-xl border border-[#113a30]">
+                        <span class="text-[9px] text-stone-500 uppercase block mb-0.5">År (365d)</span>
+                        <span id="steg-ar" class="text-base font-black text-white">0</span>
+                    </div>
+                    <div class="bg-[#031410] p-3 rounded-xl border border-[#113a30] col-span-2 flex justify-between items-center px-4">
+                        <span class="text-[10px] text-emerald-500 font-bold uppercase">Total sedan start</span>
+                        <span id="steg-total" class="text-lg font-black text-emerald-500">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-2">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4 text-emerald-500"></i> Väktarens Analys</h3>
+                    <button class="bg-[#2a251f] hover:bg-stone-800 text-amber-500 border border-amber-500/20 px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase transition-all">Kalla på råd</button>
+                </div>
+                <p class="text-stone-500 font-serif text-xs italic">Be väktaren tolka datan utifrån dina biometriska mönster i chattkanalen.</p>
             </div>
         </main>
 
         <main id="view-explorer" class="tab-content space-y-4">
-            <div class="bg-stone-900/40 border border-stone-850 p-3 rounded-2xl space-y-3">
+            <div class="space-y-1">
+                <h2 class="text-xl font-black tracking-tight text-white">Okänt Land</h2>
+                <p class="text-xs text-stone-400">Vilan.</p>
+            </div>
+            <div class="bg-[#051c16] border border-[#113a30] p-3 rounded-2xl space-y-3">
                 <div class="flex justify-between items-center font-mono text-xs px-1">
                     <span class="text-stone-500 uppercase text-[10px]">Terrängkartläggning:</span>
                     <span class="text-amber-500 font-bold">ZONER UPPLÅSTA: <span id="unlocked-count">0</span></span>
                 </div>
-                <div id="map" class="rounded-xl border border-stone-800 overflow-hidden"></div>
-                <button id="tracking-btn" onclick="window.toggleGpsTracking()" class="w-full py-3.5 bg-stone-900 border-2 border-amber-600/30 text-amber-500 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-wider">
+                <div id="map" class="rounded-xl border border-[#113a30] overflow-hidden"></div>
+                <button id="tracking-btn" onclick="window.toggleGpsTracking()" class="w-full py-3.5 bg-[#031410] border border-[#113a30] text-amber-500 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-wider transition-all">
                     <i class="w-4 h-4 fill-amber-500/20" data-lucide="play"></i>
                     <span id="tracking-btn-text">Starta Spårning</span>
                 </button>
@@ -157,35 +228,93 @@
         </main>
 
         <main id="view-achievements" class="tab-content space-y-4">
-            <div class="bg-stone-900/40 border border-stone-850 p-4 rounded-2xl space-y-4">
-                <h2 class="text-xs font-bold text-stone-300 font-mono uppercase tracking-wider border-b border-stone-850 pb-2 flex items-center gap-2"><i class="w-4 h-4 text-amber-500" data-lucide="trophy"></i> AKTIVA MILSTOLPAR</h2>
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-4">
+                <h2 class="text-xs font-bold text-stone-300 font-mono uppercase tracking-wider border-b border-[#113a30] pb-2 flex items-center gap-2"><i class="w-4 h-4 text-amber-500" data-lucide="trophy"></i> AKTIVA MILSTOLPAR</h2>
                 <div class="space-y-2.5" id="medals-container">
-                    <div class="bg-stone-950 border border-stone-850 p-3 rounded-xl flex items-center gap-3.5 opacity-30 transition-all" id="badge-did-it">
-                        <div class="p-2.5 bg-stone-900 border border-stone-800 rounded-xl text-stone-500 badge-icon"><i class="w-5 h-5" data-lucide="medal"></i></div>
+                    <div class="bg-[#031410] border border-[#113a30] p-3 rounded-xl flex items-center gap-3.5 opacity-30 transition-all" id="badge-did-it">
+                        <div class="p-2.5 bg-[#051c16] border border-[#113a30] rounded-xl text-stone-500 badge-icon"><i class="w-5 h-5" data-lucide="medal"></i></div>
                         <div><h4 class="text-xs font-bold text-stone-200 font-mono tracking-wide uppercase">I fucking did it</h4><p class="text-[10px] text-stone-500 font-mono mt-0.5">Total lyftvolym passerar 10 000 kg.</p></div>
                     </div>
-                    <div class="bg-stone-950 border border-stone-850 p-3 rounded-xl flex items-center gap-3.5 opacity-30 transition-all" id="badge-bear-load">
-                        <div class="p-2.5 bg-stone-900 border border-stone-800 rounded-xl text-stone-500 badge-icon"><i class="w-5 h-5" data-lucide="shield-alert"></i></div>
+                    <div class="bg-[#031410] border border-[#113a30] p-3 rounded-xl flex items-center gap-3.5 opacity-30 transition-all" id="badge-bear-load">
+                        <div class="p-2.5 bg-[#051c16] border border-[#113a30] rounded-xl text-stone-500 badge-icon"><i class="w-5 h-5" data-lucide="shield-alert"></i></div>
                         <div><h4 class="text-xs font-bold text-stone-200 font-mono tracking-wide uppercase">Lag om Ren Form</h4><p class="text-[10px] text-stone-500 font-mono mt-0.5">Dagsvolym trycks över 1 800 kg-taket.</p></div>
                     </div>
                 </div>
             </div>
         </main>
 
-        <div class="fixed bottom-20 left-4 right-4 max-w-[calc(100%-2rem)] md:max-w-[416px] mx-auto z-50 space-y-2">
-            <div id="volume-indicator" class="p-3 bg-stone-900/90 border border-stone-800 text-stone-400 rounded-xl font-mono flex justify-between items-center shadow-xl backdrop-blur-md">
-                <span class="text-[10px] uppercase tracking-wider font-bold" id="vol-label">LIVE-VOLYM:</span>
-                <div class="text-right"><span id="live-vol-display" class="text-base font-black text-white">0 kg</span></div>
+        <main id="view-vaktarna" class="tab-content space-y-4">
+            <div class="space-y-1">
+                <h2 class="text-xl font-black tracking-tight text-white">Väktarna</h2>
+                <p class="text-xs text-stone-400">Andlig Vägledning.</p>
             </div>
-            <div id="volume-warning-box" class="hidden bg-red-950/90 border border-red-500/50 p-2.5 rounded-xl text-center text-[10px] font-mono text-red-300 uppercase tracking-wider shadow-lg animate-pulse">⚠️ Volymkap nått! Säkra din återhämtning, Capitan.</div>
-            <button onclick="window.sparaDagensRit(true)" class="w-full py-3 bg-stone-100 text-stone-950 rounded-xl font-mono text-xs font-black flex items-center justify-center gap-2 shadow-2xl uppercase tracking-wider"><i class="w-4 h-4" data-lucide="save"></i> Säkra Dagens Rit</button>
+            <div class="bg-[#051c16] border border-[#113a30] rounded-2xl p-4 space-y-4 flex flex-col shadow-2xl">
+                <div class="grid grid-cols-2 gap-1 bg-[#031410] p-1 rounded-xl border border-[#113a30] text-center font-mono text-xs">
+                    <button class="py-1.5 bg-[#113a30] text-white rounded-lg font-bold">Vägledning</button>
+                    <button class="py-1.5 text-stone-500 cursor-not-allowed">Krönika</button>
+                </div>
+                <div id="chat-box" class="chat-container overflow-y-auto space-y-3 pr-1 font-mono text-xs">
+                    <div class="bg-[#031410] border border-[#113a30] p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500">
+                        <span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>
+                        Systemet är redo. Uppkoppling bekräftad. Din status är noterad: **BEAR**. Din asymmetri i höften kräver att vi bygger en kropp som är en fästning, inte ett korthus.
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" placeholder="Tala med andarna..." class="flex-1 bg-[#031410] border border-[#113a30] rounded-xl px-4 py-3 text-xs text-white focus:outline-none">
+                    <button class="p-3 bg-[#113a30] border border-[#113a30] text-white rounded-xl"><i data-lucide="send" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+        </main>
+
+        <main id="view-settings" class="tab-content space-y-4">
+            <div class="space-y-1">
+                <h2 class="text-xl font-black tracking-tight text-white">Inställningar</h2>
+                <p class="text-xs text-stone-400">Forma din värld.</p>
+            </div>
+
+            <div class="bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-4">
+                <div>
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5 mb-2"><i data-lucide="palette" class="w-4 h-4 text-emerald-500"></i> Atmosfär</h3>
+                    <div class="grid grid-cols-4 gap-2 h-10"><div class="bg-emerald-950 border border-emerald-500 rounded-lg cursor-pointer"></div><div class="bg-stone-900 rounded-lg"></div><div class="bg-amber-950 rounded-lg"></div><div class="bg-indigo-950 rounded-lg"></div></div>
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5 mb-2"><i data-lucide="shield" class="w-4 h-4 text-emerald-500"></i> Välj din Väktare</h3>
+                    <div class="grid grid-cols-2 gap-2 font-mono text-xs">
+                        <div class="bg-[#031410] border-2 border-amber-600 p-3 rounded-xl"><span class="block font-black text-white">Björnen 🟠</span><span class="text-[9px] text-stone-500 uppercase">Råstyrka, Massa & Vila</span></div>
+                        <div class="bg-[#031410] border border-[#113a30] p-3 rounded-xl opacity-40"><span class="block font-bold text-stone-400">Lejonet</span><span class="text-[9px] text-stone-600 uppercase">Hjärta & Hållning</span></div>
+                    </div>
+                </div>
+
+                <div class="border-t border-[#113a30] pt-4 space-y-2">
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Data & Synk</h3>
+                    <button class="w-full py-2.5 bg-stone-900/40 text-stone-500 rounded-xl font-mono text-[10px] uppercase border border-stone-800 cursor-not-allowed">Koppla Samsung Health</button>
+                    <div class="grid grid-cols-2 gap-2 font-mono text-[11px]">
+                        <button class="py-2.5 bg-[#031410] border border-[#113a30] rounded-xl hover:bg-[#113a30] transition-colors">Exportera JSON</button>
+                        <button class="py-2.5 bg-[#031410] border border-[#113a30] rounded-xl hover:bg-[#113a30] transition-colors">Importera JSON</button>
+                    </div>
+                    <button class="w-full py-2.5 bg-red-950/20 text-red-400 hover:bg-red-950/50 rounded-xl font-mono text-[10px] uppercase border border-red-900/30 font-bold transition-all">Radera allt (Nollställ)</button>
+                </div>
+            </div>
+        </main>
+
+        <div class="fixed bottom-16 left-4 right-4 max-w-[calc(100%-2rem)] md:max-w-[416px] mx-auto z-40 space-y-1.5 pointer-events-none">
+            <div id="volume-indicator" class="p-2.5 bg-[#051c16]/90 border border-[#113a30] text-stone-400 rounded-xl font-mono flex justify-between items-center shadow-xl backdrop-blur-md text-xs">
+                <span class="text-[10px] uppercase tracking-wider font-bold">LIVE-VOLYM:</span>
+                <span id="live-vol-display" class="text-sm font-black text-white">0 kg</span>
+            </div>
+            <div id="volume-warning-box" class="hidden bg-red-950/90 border border-red-500/50 p-2 rounded-xl text-center text-[10px] font-mono text-red-300 uppercase tracking-wider shadow-lg animate-pulse">⚠️ Volymkap nått! Säkra din återhämtning, Capitan.</div>
         </div>
 
-        <nav class="fixed bottom-0 left-0 right-0 bg-stone-900/90 backdrop-blur-md border-t border-t-stone-850/40 pb-safe pt-2 px-4 pb-4 z-50">
-            <div class="max-w-md mx-auto flex justify-between items-center">
-                <button onclick="window.switchTab('journal', this)" class="p-2 rounded-xl text-white bg-stone-850 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="scroll-text"></i><span class="text-[9px] uppercase tracking-tighter">Riten</span></button>
-                <button onclick="window.switchTab('explorer', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="map"></i><span class="text-[9px] uppercase tracking-tighter">Kartan</span></button>
-                <button onclick="window.switchTab('achievements', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="flame"></i><span class="text-[9px] uppercase tracking-tighter">Elden</span></button>
+        <nav class="fixed bottom-0 left-0 right-0 bg-[#020e0b]/95 backdrop-blur-md border-t border-[#09261f] pb-safe pt-2 px-2 pb-3 z-50">
+            <div class="max-w-md mx-auto flex justify-between items-center gap-0.5">
+                <button onclick="window.switchTab('rit', this)" class="p-2 rounded-xl text-amber-500 bg-[#113a30]/40 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="scroll-text"></i><span class="text-[8px] uppercase tracking-tighter font-mono">Rit</span></button>
+                <button onclick="window.switchTab('journal', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="calendar"></i><span class="text-[8px] uppercase tracking-tighter font-mono">Logg</span></button>
+                <button onclick="window.switchTab('skadande', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="eye"></i><span class="text-[8px] uppercase tracking-tighter font-mono">Skåda</span></button>
+                <button onclick="window.switchTab('explorer', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="map"></i><span class="text-[8px] uppercase tracking-tighter font-mono">Kart</span></button>
+                <button onclick="window.switchTab('achievements', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="flame"></i><span class="text-[8px] uppercase tracking-tighter font-mono">Eld</span></button>
+                <button onclick="window.switchTab('vaktarna', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="sparkles"></i><span class="text-[8px] uppercase tracking-tighter font-mono">Andar</span></button>
+                <button onclick="window.switchTab('settings', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="settings"></i><span class="text-[8px] uppercase tracking-tighter font-mono">Inst</span></button>
             </div>
         </nav>
     </div>
@@ -212,11 +341,12 @@
         let activeExercises = [];
         let map = null, userMarker = null, isGpsTracking = false, gpsWatchId = null, mapRectangles = {};
         
-        // GEN 1.5 MÅLDATUM (idag som standard, ändras vid redigering)
         let aktivtDatum = new Date().toISOString().split('T')[0];
         let autoSyncTimer = null;
+        
+        // GEN 1.5 KOLLAPSADE DAGAR CACHE
+        let collapsedCards = {};
 
-        // INLOGGNINGSSTRÖM
         auth.onAuthStateChanged(user => {
             const authScreen = document.getElementById('auth-screen');
             if (user) {
@@ -254,12 +384,12 @@
             database.ref(`users/${currentUser.uid}/logs`).on('value', snapshot => {
                 const data = snapshot.val();
                 logsData = data ? Object.values(data).sort((a,b) => b.id.localeCompare(a.id)) : [];
-                renderTidslinje();
+                
+                renderJournalboken();
                 beraknaStegStatistik();
                 uppdateraProfilState();
                 checkMedaljTriggers();
                 
-                // Ladda in nuvarande dags status till inputs vid första start
                 if(activeExercises.length === 0 && !document.getElementById('today-notes').value) {
                     laddaInDatumTillInputs(aktivtDatum, false);
                 }
@@ -274,12 +404,11 @@
             });
         }
 
-        // GEN 1.5 BACKGROUND AUTO-SAVE (Paletto-Style)
         function autoSparaData() {
             if (autoSyncTimer) clearTimeout(autoSyncTimer);
             autoSyncTimer = setTimeout(() => {
                 sparaDagensRit(false);
-            }, 1000); // Sparar tyst 1 sek efter sista ändringen
+            }, 1000);
         }
 
         function sparaDagensRit(visaAlert = false) {
@@ -291,13 +420,17 @@
                 steps: parseInt(document.getElementById('today-steps').value) || 0,
                 exercises: activeExercises,
                 notes: document.getElementById('today-notes').value.trim() || "",
-                subjectiveFeel: { mentalState: document.getElementById('today-mental').value || "Skarpt" }
+                subjectiveFeel: {
+                    livskraft: parseInt(document.getElementById('slider-livskraft').value),
+                    drommar: parseInt(document.getElementById('slider-drommar').value),
+                    mentalState: document.getElementById('today-mental') ? document.getElementById('today-mental').value : (document.getElementById('slider-veder').value + "/12 Väder")
+                }
             };
 
             database.ref(`users/${currentUser.uid}/logs/${aktivtDatum}`).set(nyLogg).then(() => {
                 raknaOmVolym();
                 if (visaAlert) {
-                    alert(`Rit för ${aktivtDatum} säkrad permanent! ✓`);
+                    alert(`Rit för ${aktivtDatum} säkrad i molnet! ✓`);
                     if(aktivtDatum === new Date().toISOString().split('T')[0]) {
                         nollstallTillIdag();
                     }
@@ -305,7 +438,7 @@
             });
         }
 
-        // GEN 1.5 CRUD: REDIGERING & RADERING
+        // REDIGERA OCH LYFT DATA FRÅN JOURNALBOKEN TILL RIT-FLIKEN
         function redigeraPass(dateId) {
             aktivtDatum = dateId;
             laddaInDatumTillInputs(dateId, true);
@@ -315,6 +448,9 @@
             banner.classList.remove('hidden');
             display.innerText = dateId;
             
+            // Växla över till Rit-fliken visuellt
+            const ritBtn = document.querySelector('button[onclick*="switchTab(\'rit\'"]');
+            switchTab('rit', ritBtn);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -338,20 +474,45 @@
             const existerandePass = logsData.find(l => l.id === dateId);
             if (existerandePass) {
                 document.getElementById('today-steps').value = existerandePass.steps || "";
-                document.getElementById('today-mental').value = existerandePass.subjectiveFeel?.mentalState || "";
                 document.getElementById('today-notes').value = existerandePass.notes || "";
+                
+                const l = existerandePass.subjectiveFeel?.livskraft || 8;
+                const d = existerandePass.subjectiveFeel?.drommar || 8;
+                let v = 9;
+                if(existerandePass.subjectiveFeel?.mentalState) {
+                    v = parseInt(existerandePass.subjectiveFeel.mentalState) || 9;
+                }
+                
+                document.getElementById('slider-livskraft').value = l;
+                document.getElementById('slider-drommar').value = d;
+                document.getElementById('slider-veder').value = v;
+                
+                document.getElementById('val-livskraft').innerText = l;
+                document.getElementById('val-drommar').innerText = d;
+                document.getElementById('val-veder').innerText = v;
+                
                 activeExercises = existerandePass.exercises || [];
             } else if (!tvingaLaddning) {
                 document.getElementById('today-steps').value = "";
-                document.getElementById('today-mental').value = "";
                 document.getElementById('today-notes').value = "";
+                document.getElementById('slider-livskraft').value = 8;
+                document.getElementById('slider-drommar').value = 8;
+                document.getElementById('slider-veder').value = 9;
+                document.getElementById('val-livskraft').innerText = 8;
+                document.getElementById('val-drommar').innerText = 8;
+                document.getElementById('val-veder').innerText = 9;
                 activeExercises = [];
             }
             renderActiveWorkoutBuilder();
             raknaOmVolym();
         }
 
-        // GEN 1.5 SKÅDANDE: BERÄKNA STEGACKUMULERING
+        function toggleCollapseCard(dateId) {
+            collapsedCards[dateId] = !collapsedCards[dateId];
+            renderJournalboken();
+        }
+
+        // BERÄKNA STEGACKUMULERING LIVE FRÅN DIN MOLNHISTORIK
         function beraknaStegStatistik() {
             const nu = new Date();
             const idagStr = nu.toISOString().split('T')[0];
@@ -364,7 +525,6 @@
 
                 if (log.id === idagStr) stegIdag = s;
 
-                // Tidsskillnad i dagar
                 const loggDatum = new Date(log.id);
                 const diffTid = Math.abs(nu - loggDatum);
                 const diffDagar = Math.ceil(diffTid / (1000 * 60 * 60 * 24));
@@ -381,13 +541,18 @@
             document.getElementById('steg-total').innerText = stegTotal.toLocaleString('sv-SE');
         }
 
-        // --- GRÄNSSNITT OCH NAVIGATION ---
+        // STRÖMLINJEFORMAD GRÄNSSNITT-TABBING
         function switchTab(tabId, btnElem) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-stone-850', 'text-white'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#113a30]/40', 'text-amber-500'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500'));
+            
             document.getElementById(`view-${tabId}`).classList.add('active');
-            btnElem.classList.add('bg-stone-850', 'text-white');
+            btnElem.classList.remove('text-stone-500');
+            btnElem.classList.add('bg-[#113a30]/40', 'text-amber-500');
+            
             if (tabId === 'explorer') setTimeout(initieraKarta, 50);
+            lucide.createIcons();
         }
 
         function valjNyOvning() {
@@ -425,24 +590,24 @@
         function renderActiveWorkoutBuilder() {
             const container = document.getElementById('active-workout-builder'); container.innerHTML = "";
             activeExercises.forEach(ex => {
-                let card = document.createElement('div'); card.className = "bg-stone-950 border border-stone-850 rounded-xl p-3 space-y-2";
+                let card = document.createElement('div'); card.className = "bg-[#031410] border border-[#113a30] rounded-xl p-3 space-y-2";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-stone-900 pb-1"><span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide"><i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}</span></div>
+                    <div class="flex justify-between items-center border-b border-[#113a30] pb-1"><span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide"><i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}</span></div>
                     <div class="space-y-1.5">
                         ${ex.sets.map((set, idx) => `
-                            <div class="flex items-center justify-between bg-stone-900/30 p-1 rounded-lg border border-stone-900/40">
-                                <span class="text-[10px] font-mono text-stone-600 font-bold ml-1">#${idx + 1}</span>
+                            <div class="flex items-center justify-between bg-[#051c16]/30 p-1 rounded-lg border border-[#113a30]/40">
+                                <span class="text-[10px] font-mono text-emerald-700 font-bold ml-1">#${idx + 1}</span>
                                 <div class="flex items-center gap-1.5">
-                                    <input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 bg-stone-950 border border-stone-850 rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
-                                    <span class="text-[9px] text-stone-600 font-mono">REPS</span>
-                                    <input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 bg-stone-950 border border-stone-850 rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
-                                    <span class="text-[9px] text-stone-600 font-mono">KG</span>
-                                    <button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-700 hover:text-red-400 p-0.5"><i data-lucide="x" class="w-3 h-3"></i></button>
+                                    <input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 bg-[#051c16] border border-[#113a30] rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
+                                    <span class="text-[9px] text-stone-500 font-mono">REPS</span>
+                                    <input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 bg-[#051c16] border border-[#113a30] rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
+                                    <span class="text-[9px] text-stone-500 font-mono">KG</span>
+                                    <button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5"><i data-lucide="x" class="w-3 h-3"></i></button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
-                    <button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 bg-stone-900 text-stone-500 text-[10px] font-mono rounded-lg border border-stone-850 mt-1.5">+ SET</button>`;
+                    <button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 bg-[#051c16] text-stone-400 text-[10px] font-mono rounded-lg border border-[#113a30] mt-1.5">+ SET</button>`;
                 container.appendChild(card);
             });
             lucide.createIcons();
@@ -455,46 +620,60 @@
             const warningBox = document.getElementById('volume-warning-box');
             display.innerText = `${total.toLocaleString('sv-SE')} kg`;
             if (total >= 1800) {
-                indicator.className = "p-3 bg-red-950/90 border-red-500 text-red-200 rounded-xl font-mono flex justify-between items-center shadow-xl";
+                indicator.className = "p-2.5 bg-red-950/90 border-red-500 text-red-200 rounded-xl font-mono flex justify-between items-center shadow-xl text-xs";
                 warningBox.classList.remove('hidden');
-                database.ref(`users/${currentUser.uid}/flags/bear_load_triggered`).set(true);
             } else {
-                indicator.className = "p-3 bg-stone-900/90 border-stone-800 text-stone-400 rounded-xl font-mono flex justify-between items-center shadow-xl";
+                indicator.className = "p-2.5 bg-[#051c16]/90 border border-[#113a30] text-stone-400 rounded-xl font-mono flex justify-between items-center shadow-xl text-xs";
                 warningBox.classList.add('hidden');
             }
         }
 
-        function renderTidslinje() {
-            const anchor = document.getElementById('historical-logs-anchor'); if (logsData.length === 0) return; anchor.innerHTML = "";
+        // RENDERING AV JOURNALBOKEN MED EXPAND/COLLAPSE HÖG KVALITET
+        function renderJournalboken() {
+            const anchor = document.getElementById('historical-logs-anchor'); if (!anchor) return;
+            if (logsData.length === 0) { anchor.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Kryptan är tom.</p>"; return; }
+            anchor.innerHTML = "";
+            
             logsData.forEach(log => {
                 let passVolym = 0, rows = "";
                 if (log.exercises) {
                     log.exercises.forEach(ex => {
                         let labels = []; ex.sets.forEach(s => { passVolym += (s.reps*s.weight); labels.push(`${s.reps}x${s.weight}k`); });
-                        rows += `<div class="flex justify-between text-[11px] font-mono bg-stone-950/40 p-1.5 rounded-xl border border-stone-900"><span class="text-stone-400 uppercase font-bold">${ex.name}</span><span class="text-stone-600">${labels.join(' • ')}</span></div>`;
+                        rows += `<div class="flex justify-between text-[11px] font-mono bg-[#031410] p-1.5 rounded-xl border border-[#113a30]/60"><span class="text-stone-300 font-bold uppercase">${ex.name}</span><span class="text-stone-500">${labels.join(' • ')}</span></div>`;
                     });
                 }
+                
                 let note = log.notes || "";
-                let feel = log.subjectiveFeel?.mentalState || "Skarpt";
-                let div = document.createElement('div'); div.className = "bg-stone-900/40 border border-stone-850 p-4 rounded-2xl space-y-2.5 text-xs";
+                let isCollapsed = collapsedCards[log.id] === true;
+                let chevronIkon = isCollapsed ? "chevron-down" : "chevron-up";
+                
+                let div = document.createElement('div');
+                div.className = "bg-[#051c16] border border-[#113a30] p-4 rounded-2xl space-y-3 text-xs shadow-lg";
+                
                 div.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-stone-900 pb-1.5">
-                        <div>
-                            <span class="font-mono text-white font-black block">${log.id}</span>
-                            <span class="text-[9px] font-mono text-stone-500 uppercase">🧠 ${feel} • 👣 ${log.steps || 0}st</span>
+                    <div class="flex justify-between items-center border-b border-[#113a30] pb-2">
+                        <div class="flex items-center gap-2 cursor-pointer" onclick="window.toggleCollapseCard('${log.id}')">
+                            <i data-lucide="${chevronIkon}" class="w-4 h-4 text-emerald-500"></i>
+                            <div>
+                                <span class="font-mono text-white font-black block text-sm">${log.id}</span>
+                                <span class="text-[9px] font-mono text-stone-500 uppercase">👣 ${log.steps || 0} st • 🧠 ${log.subjectiveFeel?.livskraft || 8}/12 Liv</span>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <span class="font-mono text-amber-500 font-bold block">${passVolym.toLocaleString('sv-SE')} kg</span>
+                        <div class="text-right flex items-center gap-3">
+                            <span class="font-mono text-amber-500 font-bold text-sm">${passVolym.toLocaleString('sv-SE')} kg</span>
+                            <button onclick="window.redigeraPass('${log.id}')" class="text-stone-400 hover:text-amber-500 transition-colors"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
                         </div>
                     </div>
-                    ${rows ? `<div class="space-y-1">${rows}</div>` : ''}
-                    ${note ? `<p class="text-stone-400 italic bg-stone-950/20 p-2 rounded-xl font-serif">"${note}"</p>` : ''}
-                    <div class="flex justify-end gap-2 pt-1 font-mono text-[10px]">
-                        <button onclick="window.redigeraPass('${log.id}')" class="px-2.5 py-1 bg-stone-800 hover:bg-stone-750 text-stone-300 rounded font-bold uppercase transition-colors">Redigera</button>
-                        <button onclick="window.raderaPass('${log.id}')" class="px-2.5 py-1 bg-stone-950 hover:bg-red-950 text-stone-600 hover:text-red-400 rounded font-bold uppercase transition-colors">Radera</button>
+                    <div class="${isCollapsed ? 'hidden' : 'space-y-3'}">
+                        ${rows ? `<div class="space-y-1">${rows}</div>` : ''}
+                        ${note ? `<p class="text-stone-400 italic bg-[#031410]/50 p-2.5 rounded-xl font-serif border-l border-emerald-800">"${note}"</p>` : ''}
+                        <div class="flex justify-end gap-2 pt-1 font-mono text-[9px]">
+                            <button onclick="window.raderaPass('${log.id}')" class="px-2 py-1 bg-red-950/20 hover:bg-red-950 text-red-400 rounded font-bold uppercase border border-red-900/20 transition-all">Radera</button>
+                        </div>
                     </div>`;
                 anchor.appendChild(div);
             });
+            lucide.createIcons();
         }
 
         function checkMedaljTriggers() {
@@ -534,7 +713,7 @@
             const btnText = document.getElementById('tracking-btn-text'), btn = document.getElementById('tracking-btn');
             if (isGpsTracking) {
                 isGpsTracking = false; if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
-                btnText.innerText = "Starta Spårning"; btn.className = "w-full py-3.5 bg-stone-900 border-2 border-amber-600/30 text-amber-500 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-wider";
+                btnText.innerText = "Starta Spårning"; btn.className = "w-full py-3.5 bg-[#031410] border border-[#113a30] text-amber-500 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-wider";
             } else {
                 if (!navigator.geolocation) return alert("GPS saknas.");
                 isGpsTracking = true; btnText.innerText = "Spårning Aktiv..."; btn.className = "w-full py-3.5 bg-red-950/40 border-2 border-red-500 text-red-400 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-wider animate-pulse";
@@ -557,7 +736,7 @@
             });
         }
 
-        // GLOBAL SCOPING FOR BUTTONS
+        // SCOPES FÖR WINDOW-KNAPPAR
         window.hanteraAuth = hanteraAuth;
         window.loggaUt = loggaUt;
         window.switchTab = switchTab;
@@ -569,10 +748,10 @@
         window.sparaDagensRit = sparaDagensRit;
         window.autoSparaData = autoSparaData;
         
-        // GEN 1.5 CRUD SCOPES
         window.redigeraPass = redigeraPass;
         window.raderaPass = raderaPass;
         window.nollstallTillIdag = nollstallTillIdag;
+        window.toggleCollapseCard = toggleCollapseCard;
 
         lucide.createIcons();
     </script>
