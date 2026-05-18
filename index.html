@@ -162,11 +162,12 @@
     </div>
 
     <script>
-        // Vite läser av dina miljövariabler härifrån live!
+        // Konfigurationen läser av dina Vercel-nycklar live, men tvingar databasen till Belgien!
         const firebaseConfig = {
             apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
             authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-            databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+            // HÅRDKODAD ADRESS TILL DIN RÄTTA SERVER I BELGIEN:
+            databaseURL: "https://primalpathgemini-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
             storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
             messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
@@ -263,7 +264,7 @@
             });
         }
 
-        function imperteraMasterData(event) {
+        function importertaMasterData(event) {
             if(!currentUser) return;
             const file = event.target.files[0];
             if (!file) return;
