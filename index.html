@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#031410">
-    <title>Primal Path Gemini | Gen 1.5 Live</title>
+    <title>Primal Path Gemini | Gen 1.5.1 Live</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -55,7 +55,7 @@
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-600 mt-0.5">AUTO-SYNC • GEN 1.5 LIVE</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-600 mt-0.5">AUTO-SYNC • GEN 1.5.1</p>
             </div>
             <button onclick="window.loggaUt()" class="px-3 py-1.5 bg-[#051c16] border border-[#113a30] rounded-xl text-stone-400 font-mono text-[10px] uppercase hover:text-red-400 transition-colors">Ut</button>
         </header>
@@ -118,7 +118,7 @@
                     <select id="exercise-selector" onchange="window.valjNyOvning()" class="bg-[#b85303] hover:bg-orange-700 text-white font-mono text-xs font-bold py-2 px-3 rounded-xl focus:outline-none cursor-pointer transition-colors">
                         <option value="">+ Lägg till kraft...</option>
                         <option value="Militärpress">Militärpress</option>
-                        <option value="Forecarm Curls">Forecarm Curls</option>
+                        <option value="Forearm Curls">Forearm Curls</option>
                         <option value="Bicep-Curls - Hantel">Bicep-Curls - Hantel</option>
                         <option value="Chins / Pull-ups">Chins / Pull-ups</option>
                         <option value="Dips">Dips</option>
@@ -256,12 +256,12 @@
                 <div id="chat-box" class="chat-container overflow-y-auto space-y-3 pr-1 font-mono text-xs">
                     <div class="bg-[#031410] border border-[#113a30] p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500">
                         <span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>
-                        Systemet är redo. Uppkoppling bekräftad. Din status är noterad: **BEAR**. Din asymmetri i höften kräver att vi bygger en kropp som är en fästning, inte ett korthus.
+                        Kryptan är tänd. Din livslinje är isolerad under ID: **BEAR**. Ställ dina frågor rörande asymmetri, biomassans densitet eller terrängens zoner när du är redo.
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" placeholder="Tala med andarna..." class="flex-1 bg-[#031410] border border-[#113a30] rounded-xl px-4 py-3 text-xs text-white focus:outline-none">
-                    <button class="p-3 bg-[#113a30] border border-[#113a30] text-white rounded-xl"><i data-lucide="send" class="w-4 h-4"></i></button>
+                    <input type="text" id="chat-input" placeholder="Tala med andarna..." class="flex-1 bg-[#031410] border border-[#113a30] rounded-xl px-4 py-3 text-xs text-white focus:outline-none">
+                    <button onclick="window.skickaChattMeddelande()" class="p-3 bg-[#113a30] border border-[#113a30] text-white rounded-xl hover:bg-emerald-800 transition-colors"><i data-lucide="send" class="w-4 h-4"></i></button>
                 </div>
             </div>
         </main>
@@ -290,10 +290,9 @@
                     <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Data & Synk</h3>
                     <button class="w-full py-2.5 bg-stone-900/40 text-stone-500 rounded-xl font-mono text-[10px] uppercase border border-stone-800 cursor-not-allowed">Koppla Samsung Health</button>
                     <div class="grid grid-cols-2 gap-2 font-mono text-[11px]">
-                        <button class="py-2.5 bg-[#031410] border border-[#113a30] rounded-xl hover:bg-[#113a30] transition-colors">Exportera JSON</button>
-                        <button class="py-2.5 bg-[#031410] border border-[#113a30] rounded-xl hover:bg-[#113a30] transition-colors">Importera JSON</button>
+                        <button onclick="window.importeraMasterDataDirekt()" class="py-2.5 bg-[#031410] border border-amber-600/40 text-amber-400 rounded-xl hover:bg-[#113a30] transition-colors font-bold text-center">Tänd JSON Backup</button>
+                        <button class="py-2.5 bg-[#031410] border border-[#113a30] rounded-xl opacity-30 cursor-not-allowed">Exportera</button>
                     </div>
-                    <button class="w-full py-2.5 bg-red-950/20 text-red-400 hover:bg-red-950/50 rounded-xl font-mono text-[10px] uppercase border border-red-900/30 font-bold transition-all">Radera allt (Nollställ)</button>
                 </div>
             </div>
         </main>
@@ -343,8 +342,6 @@
         
         let aktivtDatum = new Date().toISOString().split('T')[0];
         let autoSyncTimer = null;
-        
-        // GEN 1.5 KOLLAPSADE DAGAR CACHE
         let collapsedCards = {};
 
         auth.onAuthStateChanged(user => {
@@ -423,14 +420,14 @@
                 subjectiveFeel: {
                     livskraft: parseInt(document.getElementById('slider-livskraft').value),
                     drommar: parseInt(document.getElementById('slider-drommar').value),
-                    mentalState: document.getElementById('today-mental') ? document.getElementById('today-mental').value : (document.getElementById('slider-veder').value + "/12 Väder")
+                    mentalState: document.getElementById('slider-veder').value + "/12"
                 }
             };
 
             database.ref(`users/${currentUser.uid}/logs/${aktivtDatum}`).set(nyLogg).then(() => {
                 raknaOmVolym();
                 if (visaAlert) {
-                    alert(`Rit för ${aktivtDatum} säkrad i molnet! ✓`);
+                    alert(`Rit för ${aktivtDatum} säkrad live! ✓`);
                     if(aktivtDatum === new Date().toISOString().split('T')[0]) {
                         nollstallTillIdag();
                     }
@@ -438,7 +435,6 @@
             });
         }
 
-        // REDIGERA OCH LYFT DATA FRÅN JOURNALBOKEN TILL RIT-FLIKEN
         function redigeraPass(dateId) {
             aktivtDatum = dateId;
             laddaInDatumTillInputs(dateId, true);
@@ -448,7 +444,6 @@
             banner.classList.remove('hidden');
             display.innerText = dateId;
             
-            // Växla över till Rit-fliken visuellt
             const ritBtn = document.querySelector('button[onclick*="switchTab(\'rit\'"]');
             switchTab('rit', ritBtn);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -456,10 +451,10 @@
 
         function raderaPass(dateId) {
             if (!currentUser) return;
-            if (confirm(`Vill du radera rit/pass för ${dateId} för alltid från molnet?`)) {
+            if (confirm(`Vill du radera ${dateId} för alltid?`)) {
                 database.ref(`users/${currentUser.uid}/logs/${dateId}`).remove().then(() => {
                     if (aktivtDatum === dateId) nollstallTillIdag();
-                    alert("Riten raderad. ✓");
+                    alert("Raderad.");
                 });
             }
         }
@@ -478,10 +473,7 @@
                 
                 const l = existerandePass.subjectiveFeel?.livskraft || 8;
                 const d = existerandePass.subjectiveFeel?.drommar || 8;
-                let v = 9;
-                if(existerandePass.subjectiveFeel?.mentalState) {
-                    v = parseInt(existerandePass.subjectiveFeel.mentalState) || 9;
-                }
+                const v = parseInt(existerandePass.subjectiveFeel?.mentalState) || 9;
                 
                 document.getElementById('slider-livskraft').value = l;
                 document.getElementById('slider-drommar').value = d;
@@ -512,17 +504,24 @@
             renderJournalboken();
         }
 
-        // BERÄKNA STEGACKUMULERING LIVE FRÅN DIN MOLNHISTORIK
+        // V B H SIDOVAL LOGIK (GEN 1.5.1 ELEVATION)
+        function valjSidaForSet(exId, setIdx, valdSida) {
+            const ex = activeExercises.find(e => e.id === exId);
+            if (ex && ex.sets[setIdx]) {
+                ex.sets[setIdx].side = valdSida;
+                renderActiveWorkoutBuilder();
+                autoSparaData();
+            }
+        }
+
         function beraknaStegStatistik() {
             const nu = new Date();
             const idagStr = nu.toISOString().split('T')[0];
-            
             let stegIdag = 0, stegVecka = 0, stegManad = 0, stegAr = 0, stegTotal = 0;
 
             logsData.forEach(log => {
                 const s = parseInt(log.steps) || 0;
                 stegTotal += s;
-
                 if (log.id === idagStr) stegIdag = s;
 
                 const loggDatum = new Date(log.id);
@@ -541,7 +540,6 @@
             document.getElementById('steg-total').innerText = stegTotal.toLocaleString('sv-SE');
         }
 
-        // STRÖMLINJEFORMAD GRÄNSSNITT-TABBING
         function switchTab(tabId, btnElem) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#113a30]/40', 'text-amber-500'));
@@ -558,7 +556,7 @@
         function valjNyOvning() {
             const selector = document.getElementById('exercise-selector');
             if (!selector.value) return;
-            activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: selector.value, sets: [{ reps: 10, weight: 0 }] });
+            activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: selector.value, sets: [{ reps: 10, weight: 0, side: "B" }] });
             selector.value = ""; 
             renderActiveWorkoutBuilder(); 
             raknaOmVolym();
@@ -568,8 +566,8 @@
         function läggTillSet(exId) {
             const ex = activeExercises.find(e => e.id === exId);
             if (!ex) return;
-            const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 0 };
-            ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight });
+            const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 0, side: "B" };
+            ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight, side: lastSet.side || "B" });
             renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData();
         }
 
@@ -587,6 +585,7 @@
             raknaOmVolym(); autoSparaData();
         }
 
+        // RENDERING AV ARBETSYTA MED INBYGGDA V B H KNAPPAR
         function renderActiveWorkoutBuilder() {
             const container = document.getElementById('active-workout-builder'); container.innerHTML = "";
             activeExercises.forEach(ex => {
@@ -594,18 +593,27 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-center border-b border-[#113a30] pb-1"><span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide"><i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}</span></div>
                     <div class="space-y-1.5">
-                        ${ex.sets.map((set, idx) => `
-                            <div class="flex items-center justify-between bg-[#051c16]/30 p-1 rounded-lg border border-[#113a30]/40">
-                                <span class="text-[10px] font-mono text-emerald-700 font-bold ml-1">#${idx + 1}</span>
-                                <div class="flex items-center gap-1.5">
-                                    <input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 bg-[#051c16] border border-[#113a30] rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
-                                    <span class="text-[9px] text-stone-500 font-mono">REPS</span>
-                                    <input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 bg-[#051c16] border border-[#113a30] rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
-                                    <span class="text-[9px] text-stone-500 font-mono">KG</span>
-                                    <button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5"><i data-lucide="x" class="w-3 h-3"></i></button>
+                        ${ex.sets.map((set, idx) => {
+                            const side = set.side || "B";
+                            return `
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-[#051c16]/30 p-2 rounded-lg border border-[#113a30]/40 gap-2">
+                                <div class="flex items-center justify-between flex-1">
+                                    <span class="text-[10px] font-mono text-emerald-700 font-bold ml-1">#${idx + 1}</span>
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-10 bg-[#051c16] border border-[#113a30] rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
+                                        <span class="text-[9px] text-stone-500 font-mono">REPS</span>
+                                        <input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-12 bg-[#051c16] border border-[#113a30] rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
+                                        <span class="text-[9px] text-stone-500 font-mono">KG</span>
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('')}
+                                <div class="flex items-center justify-end gap-1 font-mono text-[9px] font-bold">
+                                    <button onclick="window.valjSidaForSet('${ex.id}', ${idx}, 'V')" class="px-1.5 py-0.5 rounded transition-all ${side === 'V' ? 'bg-amber-600 text-white' : 'bg-[#031410] text-stone-500'}">V</button>
+                                    <button onclick="window.valjSidaForSet('${ex.id}', ${idx}, 'B')" class="px-1.5 py-0.5 rounded transition-all ${side === 'B' ? 'bg-emerald-700 text-white' : 'bg-[#031410] text-stone-500'}">B</button>
+                                    <button onclick="window.valjSidaForSet('${ex.id}', ${idx}, 'H')" class="px-1.5 py-0.5 rounded transition-all ${side === 'H' ? 'bg-amber-600 text-white' : 'bg-[#031410] text-stone-500'}">H</button>
+                                    <button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button>
+                                </div>
+                            </div>`;
+                        }).join('')}
                     </div>
                     <button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 bg-[#051c16] text-stone-400 text-[10px] font-mono rounded-lg border border-[#113a30] mt-1.5">+ SET</button>`;
                 container.appendChild(card);
@@ -628,7 +636,7 @@
             }
         }
 
-        // RENDERING AV JOURNALBOKEN MED EXPAND/COLLAPSE HÖG KVALITET
+        // RENDERING MED DETEKTERING AV HISTORISK V B H DATA
         function renderJournalboken() {
             const anchor = document.getElementById('historical-logs-anchor'); if (!anchor) return;
             if (logsData.length === 0) { anchor.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Kryptan är tom.</p>"; return; }
@@ -638,8 +646,13 @@
                 let passVolym = 0, rows = "";
                 if (log.exercises) {
                     log.exercises.forEach(ex => {
-                        let labels = []; ex.sets.forEach(s => { passVolym += (s.reps*s.weight); labels.push(`${s.reps}x${s.weight}k`); });
-                        rows += `<div class="flex justify-between text-[11px] font-mono bg-[#031410] p-1.5 rounded-xl border border-[#113a30]/60"><span class="text-stone-300 font-bold uppercase">${ex.name}</span><span class="text-stone-500">${labels.join(' • ')}</span></div>`;
+                        let labels = []; 
+                        ex.sets?.forEach(s => { 
+                            passVolym += (s.reps*s.weight); 
+                            const sideLabel = s.side && s.side !== 'B' ? ` (${s.side})` : '';
+                            labels.push(`${s.reps}x${s.weight}k${sideLabel}`); 
+                        });
+                        rows += `<div class="flex justify-between text-[11px] font-mono bg-[#031410] p-1.5 rounded-xl border border-[#113a30]/60"><span class="text-stone-300 font-bold uppercase">${ex.name}</span><span class="text-stone-500 text-right">${labels.join(' • ')}</span></div>`;
                     });
                 }
                 
@@ -676,6 +689,43 @@
             lucide.createIcons();
         }
 
+        // TEXTBASERAT STRÖMLINJE-ANROP TILL GEMINI API VIA KÄLLKODENS NYCKEL
+        function skickaChattMeddelande() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<div class="bg-[#051c16] border border-[#113a30] p-3 rounded-xl text-stone-200 text-right"><span class="text-[9px] text-emerald-500 block uppercase font-bold mb-1">Jonas</span>${msg}</div>`;
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Framtida anrop binds enkelt mot import.meta.env.VITE_GEMINI_API_KEY här
+        }
+
+        // MANUELL FILTERFRI JSON-LADDNING FÖR SÄKER ÖVERSKRIFT
+        function importeraMasterDataDirekt() {
+            if(!currentUser) return;
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    try {
+                        const parsed = JSON.parse(evt.target.result);
+                        const logs = parsed.users ? Object.values(parsed.users)[0].logs : (parsed.logs || parsed);
+                        Object.values(logs).forEach(log => {
+                            database.ref(`users/${currentUser.uid}/logs/${log.id}`).set(log);
+                        });
+                        alert("MOLNET SYNKAT & ÅTERSTÄLLT MED FULLSTÄNDIG V B H DATA! ✓");
+                    } catch(err) { alert("Fel vid tolkning av backupfilen."); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
         function checkMedaljTriggers() {
             let totalVol = 0; logsData.forEach(l => l.exercises?.forEach(ex => ex.sets?.forEach(s => totalVol += (s.reps*s.weight))));
             if (totalVol > 10000) aktiveraMedaljElement('badge-did-it');
@@ -690,7 +740,6 @@
             el.querySelector('.badge-icon').className = "p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-500 shadow-lg";
         }
 
-        // --- KARTMOTOR ---
         function initieraKarta() {
             if (map) { map.invalidateSize(); return; }
             map = L.map('map', { zoomControl: false }).setView([61.12, 14.61], 14);
@@ -736,7 +785,7 @@
             });
         }
 
-        // SCOPES FÖR WINDOW-KNAPPAR
+        // SCOPES FÖR GLOBAL WINDOW INPUT
         window.hanteraAuth = hanteraAuth;
         window.loggaUt = loggaUt;
         window.switchTab = switchTab;
@@ -747,11 +796,14 @@
         window.toggleGpsTracking = toggleGpsTracking;
         window.sparaDagensRit = sparaDagensRit;
         window.autoSparaData = autoSparaData;
+        window.skickaChattMeddelande = skickaChattMeddelande;
+        window.importeraMasterDataDirekt = importeraMasterDataDirekt;
         
         window.redigeraPass = redigeraPass;
         window.raderaPass = raderaPass;
         window.nollstallTillIdag = nollstallTillIdag;
         window.toggleCollapseCard = toggleCollapseCard;
+        window.valjSidaForSet = valjSidaForSet;
 
         lucide.createIcons();
     </script>
