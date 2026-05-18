@@ -161,12 +161,11 @@
         </nav>
     </div>
 
-    <script>
-        // Konfigurationen läser av dina Vercel-nycklar live, men tvingar databasen till Belgien!
+    <script type="module">
+        // Nu körs skriptet som type="module" så Vite kan injektera dina miljövariabler korrekt!
         const firebaseConfig = {
             apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
             authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-            // HÅRDKODAD ADRESS TILL DIN RÄTTA SERVER I BELGIEN:
             databaseURL: "https://primalpathgemini-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
             storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
@@ -175,7 +174,7 @@
             measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
         };
 
-        // Initiera Firebase
+        // Initiera Firebase via globala CDN-paketen
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const database = firebase.database();
@@ -264,7 +263,7 @@
             });
         }
 
-        function importertaMasterData(event) {
+        function importeraMasterData(event) {
             if(!currentUser) return;
             const file = event.target.files[0];
             if (!file) return;
@@ -332,16 +331,16 @@
                             <div class="flex items-center justify-between bg-stone-900/30 p-1 rounded-lg border border-stone-900/40">
                                 <span class="text-[10px] font-mono text-stone-600 font-bold ml-1">#${idx + 1}</span>
                                 <div class="flex items-center gap-1.5">
-                                    <input type="number" value="${set.reps}" oninput="uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 bg-stone-950 border border-stone-850 rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
+                                    <input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 bg-stone-950 border border-stone-850 rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
                                     <span class="text-[9px] text-stone-600 font-mono">REPS</span>
-                                    <input type="number" value="${set.weight}" oninput="uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 bg-stone-950 border border-stone-850 rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
+                                    <input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 bg-stone-950 border border-stone-850 rounded text-center text-xs font-mono py-0.5 text-white focus:outline-none">
                                     <span class="text-[9px] text-stone-600 font-mono">KG</span>
-                                    <button onclick="taBortSet('${ex.id}', ${idx})" class="text-stone-700 hover:text-red-400 p-0.5"><i data-lucide="x" class="w-3 h-3"></i></button>
+                                    <button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-700 hover:text-red-400 p-0.5"><i data-lucide="x" class="w-3 h-3"></i></button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
-                    <button onclick="läggTillSet('${ex.id}')" class="w-full py-1 bg-stone-900 text-stone-500 text-[10px] font-mono rounded-lg border border-stone-850 mt-1.5">+ SET</button>`;
+                    <button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 bg-stone-900 text-stone-500 text-[10px] font-mono rounded-lg border border-stone-850 mt-1.5">+ SET</button>`;
                 container.appendChild(card);
             });
             lucide.createIcons();
@@ -439,6 +438,19 @@
                 document.getElementById('profile-snapshot').classList.remove('hidden');
             });
         }
+
+        // SÄKERHETSBRYGGA: Eftersom skriptet är en modul måste vi fästa funktionerna på window-objektet så att knapparna hittar dem!
+        window.hanteraAuth = hanteraAuth;
+        window.loggaUt = loggaUt;
+        window.switchTab = switchTab;
+        window.valjNyOvning = valjNyOvning;
+        window.läggTillSet = läggTillSet;
+        window.taBortSet = taBortSet;
+        window.uppdateraSetData = uppdateraSetData;
+        window.toggleGpsTracking = toggleGpsTracking;
+        window.sparaDagensRit = sparaDagensRit;
+        window.importeraMasterData = importeraMasterData;
+
         lucide.createIcons();
     </script>
 </body>
