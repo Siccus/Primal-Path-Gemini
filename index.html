@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#021a14">
-    <title>Primal Path AI | Gen 1.6.3 Cloudinary Native</title>
+    <title>Primal Path AI | Gen 1.6.3 Live Framework</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -54,7 +54,7 @@
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">CLOUDINARY NATIVE • GEN 1.6.3</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">HYBRID ENGINE • GEN 1.6.3</p>
             </div>
             <div class="flex items-center gap-3">
                 <div id="sync-indicator" class="text-emerald-500 transition-all" title="Allt synkat med molnet">
@@ -90,25 +90,25 @@
                 <div class="space-y-1">
                     <div class="flex justify-between font-mono text-xs">
                         <span class="text-stone-400 font-bold uppercase tracking-wider">Energi (Livskraft)</span>
-                        <span class="text-white font-black"><span id="val-livskraft">8</span> / 10</span>
+                        <span class="text-white font-black"><span id="val-livskraft">8</span> / 12</span>
                     </div>
-                    <input type="range" id="slider-livskraft" min="1" max="10" value="8" oninput="document.getElementById('val-livskraft').innerText=this.value; window.autoSparaData();" class="w-full accent-amber-500 h-1.5 bg-[#021611] rounded-lg appearance-none cursor-pointer">
+                    <input type="range" id="slider-livskraft" min="1" max="12" value="8" oninput="document.getElementById('val-livskraft').innerText=this.value; window.autoSparaData();" class="w-full accent-amber-500 h-1.5 bg-[#021611] rounded-lg appearance-none cursor-pointer">
                 </div>
 
                 <div class="space-y-1">
                     <div class="flex justify-between font-mono text-xs">
                         <span class="text-stone-400 font-bold uppercase tracking-wider">Sömnkvalitet</span>
-                        <span class="text-white font-black"><span id="val-drommar">8</span> / 10</span>
+                        <span class="text-white font-black"><span id="val-drommar">8</span> / 12</span>
                     </div>
-                    <input type="range" id="slider-drommar" min="1" max="10" value="8" oninput="document.getElementById('val-drommar').innerText=this.value; window.autoSparaData();" class="w-full accent-indigo-500 h-1.5 bg-[#021611] rounded-lg appearance-none cursor-pointer">
+                    <input type="range" id="slider-drommar" min="1" max="12" value="8" oninput="document.getElementById('val-drommar').innerText=this.value; window.autoSparaData();" class="w-full accent-indigo-500 h-1.5 bg-[#021611] rounded-lg appearance-none cursor-pointer">
                 </div>
 
                 <div class="space-y-1">
                     <div class="flex justify-between font-mono text-xs">
                         <span class="text-stone-400 font-bold uppercase tracking-wider">Mentalt Fokus</span>
-                        <span class="text-white font-black"><span id="val-veder">9</span> / 10</span>
+                        <span class="text-white font-black"><span id="val-veder">9</span> / 12</span>
                     </div>
-                    <input type="range" id="slider-veder" min="1" max="10" value="9" oninput="document.getElementById('val-veder').innerText=this.value; window.autoSparaData();" class="w-full accent-emerald-500 h-1.5 bg-[#021611] rounded-lg appearance-none cursor-pointer">
+                    <input type="range" id="slider-veder" min="1" max="12" value="9" oninput="document.getElementById('val-veder').innerText=this.value; window.autoSparaData();" class="w-full accent-emerald-500 h-1.5 bg-[#021611] rounded-lg appearance-none cursor-pointer">
                 </div>
 
                 <div class="space-y-2 pt-2 border-t border-[#0d4737]/40">
@@ -160,13 +160,6 @@
                 <h2 class="text-xl font-black tracking-tight text-white">Journalboken</h2>
                 <p class="text-xs text-stone-400">Din träningshistoria.</p>
             </div>
-            
-            <div class="grid grid-cols-3 gap-1 bg-[#03241b] p-1 rounded-xl border border-[#0d4737] text-center font-mono text-xs">
-                <button class="py-1.5 bg-[#0d4737] text-white rounded-lg font-bold">Dag</button>
-                <button class="py-1.5 text-stone-600 cursor-not-allowed">Vecka</button>
-                <button class="py-1.5 text-stone-600 cursor-not-allowed">Månad</button>
-            </div>
-
             <div id="historical-logs-anchor" class="space-y-4"></div>
         </main>
 
@@ -186,11 +179,11 @@
             <div class="bg-[#03241b] border border-[#0d4737] p-4 rounded-2xl space-y-3">
                 <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="eye" class="w-4 h-4 text-emerald-500"></i> Stegackumulering</h3>
                 <div class="grid grid-cols-2 gap-2 font-mono text-xs text-center">
-                    <div class="bg-[#021611] p-2.5 rounded-xl border border-[#0d4737]"><span class="text-[9px] text-stone-500 uppercase block mb-0.5">Idag</span><span id="steg-idag" class="text-base font-black text-white">0</span></div>
-                    <div class="bg-[#021611] p-2.5 rounded-xl border border-[#0d4737]"><span class="text-[9px] text-stone-500 uppercase block mb-0.5">Vecka (7d)</span><span id="steg-vecka" class="text-base font-black text-amber-500">0</span></div>
-                    <div class="bg-[#021611] p-2.5 rounded-xl border border-[#0d4737]"><span class="text-[9px] text-stone-500 uppercase block mb-0.5">Månad (30d)</span><span id="steg-manad" class="text-base font-black text-white">0</span></div>
-                    <div class="bg-[#021611] p-2.5 rounded-xl border border-[#0d4737]"><span class="text-[9px] text-stone-500 uppercase block mb-0.5">År (365d)</span><span id="steg-ar" class="text-base font-black text-white">0</span></div>
-                    <div class="bg-[#021611] p-3 rounded-xl border border-[#0d4737] col-span-2 flex justify-between items-center px-4">
+                    <div class="bg-[#021611] p-2.5 rounded-xl border border-[#0d4737]/60"><span class="text-[9px] text-stone-500 uppercase block mb-0.5">Idag</span><span id="steg-idag" class="text-base font-black text-white">0</span></div>
+                    <div class="bg-[#021611] p-2.5 rounded-xl border border-[#0d4737]/60"><span class="text-[9px] text-stone-500 uppercase block mb-0.5">Vecka (7d)</span><span id="steg-vecka" class="text-base font-black text-amber-500">0</span></div>
+                    <div class="bg-[#021611] p-2.5 rounded-xl border border-[#0d4737]/60"><span class="text-[9px] text-stone-500 uppercase block mb-0.5">Månad (30d)</span><span id="steg-manad" class="text-base font-black text-white">0</span></div>
+                    <div class="bg-[#021611] p-2.5 rounded-xl border border-[#0d4737]/60"><span class="text-[9px] text-stone-500 uppercase block mb-0.5">År (365d)</span><span id="steg-ar" class="text-base font-black text-white">0</span></div>
+                    <div class="bg-[#021611] p-3 rounded-xl border border-[#0d4737]/60 col-span-2 flex justify-between items-center px-4">
                         <span class="text-[10px] text-emerald-500 font-bold uppercase">Total sedan start</span>
                         <span id="steg-total" class="text-lg font-black text-emerald-500">0</span>
                     </div>
@@ -218,7 +211,7 @@
                 <div id="chat-box" class="chat-container overflow-y-auto space-y-3 pr-1 font-mono text-xs">
                     <div class="bg-[#021611] border border-[#0d4737] p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500">
                         <span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>
-                        Kryptan är öppen. Din data är säkrad. Ställ dina frågor när du är redo.
+                        Kryptan är tänd. Hybrid-synken (IndexedDB + Cloud) är aktiv, Jonas. Tala med mig när du vill.
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -233,14 +226,17 @@
             <div class="bg-[#03241b] border border-[#0d4737] p-4 rounded-2xl space-y-4">
                 
                 <div class="space-y-2">
-                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="image" class="w-4 h-4 text-emerald-500"></i> Bildlagring (Cloudinary)</h3>
-                    <input type="text" id="setting-cloud-name" placeholder="Ditt Cloudinary Name" oninput="localStorage.setItem('cloudinary_name', this.value)" class="w-full bg-[#021611] border border-[#0d4737] rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                    <input type="text" id="setting-cloud-preset" placeholder="Din Upload Preset (Unsigned)" oninput="localStorage.setItem('cloudinary_preset', this.value)" class="w-full bg-[#021611] border border-[#0d4737] rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                    <p class="text-[9px] text-stone-500 font-mono italic leading-tight">Ange egna uppgifter här så laddas bilderna upp till din egen lagring (Zero cost architecture).</p>
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5 mb-1"><i data-lucide="image" class="w-4 h-4 text-emerald-500"></i> Bildlagring (Cloudinary)</h3>
+                    <input type="text" id="setting-cloud-name" placeholder="Ditt Cloudinary Name" oninput="localStorage.setItem('cloudinary_name', this.value)" class="w-full bg-[#021611] border border-[#0d4737] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+                    <input type="text" id="setting-cloud-preset" placeholder="Din Upload Preset (Unsigned)" oninput="localStorage.setItem('cloudinary_preset', this.value)" class="w-full bg-[#021611] border border-[#0d4737] rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none">
+                    
+                    <a href="https://cloudinary.com/users/login" target="_blank" class="w-full py-2 bg-[#021611] border border-[#0d4737]/80 hover:border-emerald-500 text-stone-400 hover:text-white rounded-xl font-mono text-[10px] uppercase text-center block transition-all shadow-sm">
+                        🔑 Öppna Bildvalvet (Administrera)
+                    </a>
                 </div>
 
                 <div class="border-t border-[#0d4737]/60 pt-4 space-y-2">
-                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase mb-2 flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Data & Synk</h3>
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5 mb-1"><i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Data & Synk</h3>
                     <button onclick="window.importeraMasterDataDirekt()" class="w-full py-2.5 bg-[#021611] border border-amber-600/40 text-amber-400 rounded-xl hover:bg-[#0d4737] transition-colors font-bold font-mono text-[10px] uppercase shadow-md">Tänd JSON Backup</button>
                     <button onclick="window.exporteraMasterDataLive()" class="w-full py-2.5 bg-[#021611] border border-[#0d4737] text-stone-400 rounded-xl hover:bg-[#0d4737] transition-colors font-bold font-mono text-[10px] uppercase">Ladda ned Hård Backup</button>
                     <button onclick="window.rensaIndexedDB()" class="w-full py-2.5 bg-red-950/20 text-red-500 border border-red-900/30 rounded-xl font-bold font-mono text-[10px] uppercase mt-2">Rensa Lokal Cache</button>
@@ -294,7 +290,7 @@
         let autoSyncTimer = null;
         let collapsedCards = {};
 
-        // 1. INDEXED DB (Lokal Cache)
+        // 1. ROBUST LOCAL-FIRST INDEXED DB
         let db;
         const dbRequest = indexedDB.open("PrimalPathDB", 1);
         dbRequest.onerror = (e) => console.error("IndexedDB error:", e);
@@ -321,8 +317,7 @@
 
         function saveToIDB(logObj) {
             if(!db) return;
-            const transaction = db.transaction(["logs"], "readwrite");
-            transaction.objectStore("logs").put(logObj);
+            db.transaction(["logs"], "readwrite").objectStore("logs").put(logObj);
         }
 
         function getAllFromIDB(callback) {
@@ -334,11 +329,11 @@
         function initieraSystem() {
             if(!currentUser) return;
             
-            // Fyll i sparade inställningar
+            // Fyll i sparade Cloudinary parametrar från telefonminnet
             document.getElementById('setting-cloud-name').value = localStorage.getItem('cloudinary_name') || "";
             document.getElementById('setting-cloud-preset').value = localStorage.getItem('cloudinary_preset') || "";
 
-            // Läs lokal cache
+            // Läs IDB omedelbart för offline-first skydd
             getAllFromIDB((lokalData) => {
                 if(lokalData && lokalData.length > 0) {
                     logsData = lokalData;
@@ -346,17 +341,17 @@
                 }
             });
 
-            // Live-lyssna på molnet för cross-device synk
+            // Live-monitor på Firebase Realtime database för cross-device synk utan dubbletter
             database.ref(`users/${currentUser.uid}/logs`).on('value', snapshot => {
                 const data = snapshot.val();
                 if(data) {
                     const molnLogs = Object.values(data);
-                    molnLogs.forEach(log => saveToIDB(log)); // Spegla till disk
+                    molnLogs.forEach(log => saveToIDB(log)); // Spegla omedelbart till disk
                     logsData = molnLogs.sort((a,b) => b.id.localeCompare(a.id));
                     
                     renderJournalboken(); beraknaStegStatistik();
                     
-                    // Uppdatera skärmen utan att rensa om man inte skrivit något lokalt just nu
+                    // Överskriv inte skärmen om användaren aktivt håller på att redigera eller skriva
                     const currentInput = document.getElementById('today-notes-input').value;
                     if(!currentInput) {
                         laddaInDatumTillInputs(aktivtDatum, false);
@@ -365,23 +360,6 @@
                 }
             });
         }
-
-        function hanteraAuth(typ) {
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const errBox = document.getElementById('auth-error');
-            errBox.innerText = "";
-            if(!email || !password) return errBox.innerText = "Fyll i fälten.";
-            if(typ === 'LOGGA_IN') {
-                auth.signInWithEmailAndPassword(email, password).catch(err => errBox.innerText = err.message);
-            } else {
-                auth.createUserWithEmailAndPassword(email, password).then(cred => {
-                    database.ref(`users/${cred.user.uid}`).set({ created: Date.now() });
-                }).catch(err => errBox.innerText = err.message);
-            }
-        }
-
-        function loggaUt() { auth.signOut().then(() => location.reload()); }
 
         function autoSparaData() {
             setSyncState('saving');
@@ -401,7 +379,7 @@
             lucide.createIcons();
         }
 
-        // ================= CLOUDINARY LOGIK =================
+        // ================= CLOUDINARY NATIVE UPLOAD SYSTEM =================
         async function laddaUppBild(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -431,11 +409,11 @@
                     renderImagesList();
                     autoSparaData();
                 } else {
-                    alert("Fel vid bilduppladdning. Kontrollera inställningarna.");
+                    alert("Fel vid bilduppladdning. Kontrollera dina inställningar på Cloudinary.");
                 }
             } catch (err) {
                 console.error(err);
-                alert("Uppladdning misslyckades.");
+                alert("Nätverksfel vid uppladdning.");
             } finally {
                 document.getElementById('upload-spinner').classList.add('hidden');
                 event.target.value = ""; 
@@ -503,17 +481,16 @@
                 }
             };
             
-            saveToIDB(nyLogg); // 1. Offline direkt
+            saveToIDB(nyLogg); // Offline skydd omedelbart
 
-            // 2. Synka med molnet bakgrunds
             database.ref(`users/${currentUser.uid}/logs/${aktivtDatum}`).set(nyLogg).then(() => {
                 raknaOmVolym(); setSyncState('synced');
-                if (visaAlert) { alert(`Rit sparad och synkad! ✓`); if(aktivtDatum === new Date().toISOString().split('T')[0]) nollstallTillIdag(); }
+                if (visaAlert) { alert(`Riten sparad och låst live! ✓`); if(aktivtDatum === new Date().toISOString().split('T')[0]) nollstallTillIdag(); }
             });
         }
 
         function rensaSkarmForNyDag() {
-            if(confirm("Vill du rensa skärmen? (Din data är redan säker i molnet/minnet)")) {
+            if(confirm("Vill du rensa skärmens inputs för en ny dag? (All historik ligger kvar orörd)")) {
                 nollstallTillIdag();
             }
         }
@@ -612,7 +589,7 @@
                     <div class="p-4 flex justify-between items-center cursor-pointer hover:bg-[#053527]/20 transition-colors" onclick="window.toggleCollapseCard('${log.id}')">
                         <div class="flex items-center gap-3.5">
                             <div class="bg-[#021611] border border-[#0d4737] rounded-xl px-2.5 py-1 text-center font-mono w-14"><span class="text-[9px] text-stone-500 uppercase block font-bold tracking-wider">${manadStr}</span><span class="text-lg font-black text-white leading-none block mt-0.5">${dagNummer}</span></div>
-                            <div><span class="text-sm font-black text-white block">${veckodag}</span><span class="text-[9px] font-mono text-stone-400 uppercase tracking-wide flex items-center gap-1.5 mt-0.5">👣 ${log.steps || 0} • 💬 ${log.subjectiveFeel?.energyLevel || 8}/10 • ⚡ ${passVolym.toLocaleString('sv-SE')} kg</span></div>
+                            <div><span class="text-sm font-black text-white block">${veckodag}</span><span class="text-[9px] font-mono text-stone-400 uppercase tracking-wide flex items-center gap-1.5 mt-0.5">👣 ${log.steps || 0} • 💬 ${log.subjectiveFeel?.energyLevel || 8}/12 • ⚡ ${passVolym.toLocaleString('sv-SE')} kg</span></div>
                         </div>
                         <div class="flex items-center gap-3 font-mono text-right" onclick="event.stopPropagation();"><button onclick="window.redigeraPass('${log.id}')" class="text-stone-400 hover:text-amber-500 transition-colors mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button><i data-lucide="${chevronIkon}" class="w-5 h-5 text-emerald-500"></i></div>
                     </div>
@@ -620,8 +597,8 @@
                         <div class="grid grid-cols-2 gap-2 font-mono text-xs">
                             <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🏋️ Gymvolym</span><span class="text-sm font-black text-emerald-500 block mt-0.5">${passVolym.toLocaleString('sv-SE')} <span class="text-[10px] font-normal text-stone-500">kg</span></span></div>
                             <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">👣 Vandringslast</span><span class="text-sm font-black text-amber-500 block mt-0.5">${((log.steps || 0) * 60 / 1000).toFixed(1)} <span class="text-[10px] font-normal text-stone-500">ton</span></span></div>
-                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🌙 Sömn</span><span class="text-sm font-black text-indigo-400 block mt-0.5">${log.subjectiveFeel?.sleepQuality || 8}/10</span></div>
-                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🧠 Inre Väder</span><span class="text-sm font-black text-emerald-400 block mt-0.5">${log.subjectiveFeel?.mentalFocus || 9}/10</span></div>
+                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🌙 Sömn</span><span class="text-sm font-black text-indigo-400 block mt-0.5">${log.subjectiveFeel?.sleepQuality || 8}/12</span></div>
+                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🧠 Inre Väder</span><span class="text-sm font-black text-emerald-400 block mt-0.5">${log.subjectiveFeel?.mentalFocus || 9}/12</span></div>
                         </div>
                         ${notesHtml || imagesHtml ? `<div class="space-y-1.5"><span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">ANTECKNINGAR & BILDER</span><div class="bg-[#021611] border border-[#0d4737]/40 p-3 rounded-xl">${notesHtml}${imagesHtml}</div></div>` : ''}
                         ${rows ? `<div class="space-y-1.5"><span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">TRÄNING</span><div class="bg-[#021611] border border-[#0d4737]/40 p-3 rounded-xl">${rows}</div></div>` : ''}
@@ -637,7 +614,6 @@
             const chatBox = document.getElementById('chat-box');
             chatBox.innerHTML += `<div class="bg-[#03241b] border border-[#0d4737] p-3 rounded-xl text-stone-200 text-right shadow-md"><span class="text-[9px] text-emerald-400 block uppercase font-bold mb-1">Jonas</span>${msg}</div>`;
             input.value = ""; chatBox.scrollTop = chatBox.scrollHeight;
-
             const loaderId = 'vaktare-load-' + Date.now();
             chatBox.innerHTML += `<div id="${loaderId}" class="bg-[#021611] border border-[#0d4737] p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500 font-mono text-xs animate-pulse"><span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>Tuggar i kryptan...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
@@ -661,7 +637,7 @@
                     try {
                         const parsed = JSON.parse(evt.target.result); const logs = parsed.logs || parsed;
                         Object.values(logs).forEach(log => { saveToIDB(log); database.ref(`users/${currentUser.uid}/logs/${log.id}`).set(log); });
-                        alert("MOLNET OCH LOCAL CACHE SYNKAT! ✓");
+                        alert("MOLNET OCH LOCAL CACHE HYBRID-SYNKAT! ✓");
                     } catch(err) { alert("Fel vid tolkning."); }
                 }; reader.readAsText(file);
             }; input.click();
@@ -673,8 +649,8 @@
         }
 
         function rensaIndexedDB() {
-            if(confirm("Vill du rensa den lokala cachen? Detta tvingar appen att hämta allt från molnet på nytt nästa gång du laddar om.")) {
-                if(db) { const req = indexedDB.deleteDatabase("PrimalPathDB"); req.onsuccess = () => { alert("Lokal Cache tömd. Ladda om appen."); location.reload(); }; }
+            if(confirm("Vill du rensa den lokala cache-porten?")) {
+                if(db) { const req = indexedDB.deleteDatabase("PrimalPathDB"); req.onsuccess = () => { alert("Lokal Cache tömd. Ladda om sidan."); location.reload(); }; }
             }
         }
 
