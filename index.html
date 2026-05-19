@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#021a14">
-    <title>Primal Path AI | Gen 2.2.0 Fysisk Vision</title>
+    <title>Primal Path Gemini | Gen 2.3.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -52,18 +52,6 @@
         </div>
     </div>
 
-    <div id="cloudinary-modal" class="hidden fixed inset-0 bg-[#010f0c]/90 z-[200] flex items-center justify-center px-4 backdrop-blur-sm">
-        <div class="temple-bg temple-border p-6 rounded-2xl w-full max-w-sm space-y-4 text-center temple-shadow">
-            <div class="flex justify-center text-amber-500 mb-2"><i data-lucide="cloud-lightning" class="w-10 h-10"></i></div>
-            <h3 class="text-lg font-black text-white font-mono uppercase tracking-wide">Cloudinary Session</h3>
-            <p class="text-xs text-stone-300 font-mono leading-relaxed">Vill du bli vidareledd till Cloudinary för att logga in och stanna inloggad i 30 dagar?</p>
-            <div class="grid grid-cols-2 gap-3 mt-6">
-                <button onclick="window.handleCloudinaryRedirect(false)" class="py-3 bg-red-950/40 text-red-400 rounded-xl border border-red-900/50 text-xs font-mono font-bold uppercase transition-all hover:bg-red-900/40">Nej, Avbryt</button>
-                <button onclick="window.handleCloudinaryRedirect(true)" class="py-3 bg-emerald-900/80 text-emerald-400 rounded-xl border border-emerald-700 text-xs font-mono font-bold uppercase transition-all hover:bg-emerald-800">Ja, Vidareled</button>
-            </div>
-        </div>
-    </div>
-
     <div class="max-w-md mx-auto px-4 pt-6 space-y-5">
         
         <header class="flex justify-between items-center border-b border-[#053527] pb-3">
@@ -71,7 +59,7 @@
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">GEN 2.2.0 • OFFLINE FIRST</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">GEN 2.3.0 • OFFLINE FIRST</p>
             </div>
             <div class="flex items-center gap-3">
                 <div id="sync-indicator" class="text-amber-500 transition-all" title="Väntar på synk">
@@ -140,12 +128,17 @@
                 <div class="space-y-2 pt-2 border-t border-[#0d4737]/40">
                     <div class="flex justify-between items-center">
                         <span class="text-[10px] font-mono text-stone-400 uppercase">Formbild / Minnen</span>
-                        <label class="temple-input-bg temple-border hover:border-emerald-500 text-emerald-500 cursor-pointer rounded-xl px-3 py-1.5 flex items-center justify-center transition-all text-xs font-bold font-mono temple-shadow">
-                            <i data-lucide="camera" class="w-4 h-4 mr-1.5"></i> Ta/Välj bild
-                            <input type="file" id="image-upload-input" accept="image/*" multiple class="hidden" onchange="window.laggBildIKo(event)">
-                        </label>
+                        <div class="flex gap-2">
+                            <label class="temple-input-bg temple-border hover:border-emerald-500 text-emerald-500 cursor-pointer rounded-xl px-3 py-1.5 flex items-center justify-center transition-all text-xs font-bold font-mono temple-shadow">
+                                <i data-lucide="camera" class="w-4 h-4 mr-1.5"></i> Välj
+                                <input type="file" id="image-upload-input" accept="image/*" multiple class="hidden" onchange="window.laggBildIKo(event)">
+                            </label>
+                            <button id="save-images-btn" onclick="window.sparaBildKo()" class="bg-amber-600 hover:bg-amber-700 text-white rounded-xl px-3 py-1.5 flex items-center justify-center transition-all temple-shadow hidden">
+                                <i data-lucide="cloud-upload" class="w-4 h-4 mr-1.5"></i> Spara
+                            </button>
+                        </div>
                     </div>
-                    <div id="upload-spinner" class="hidden text-[10px] font-mono text-amber-500 animate-pulse text-right">Offrar bilder till Cloudinary...</div>
+                    <div id="upload-spinner" class="hidden text-[10px] font-mono text-amber-500 animate-pulse text-right pt-1">Offrar bilder till Cloudinary...</div>
                     <div id="active-images-list" class="grid grid-cols-3 gap-2 pt-1"></div>
                 </div>
             </div>
@@ -237,7 +230,7 @@
                 <div id="chat-box" class="chat-container overflow-y-auto space-y-3 pr-1 font-mono text-xs">
                     <div class="temple-input-bg temple-border p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500">
                         <span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>
-                        Kryptan är öppen. Din data är säkrad. Ställ dina frågor när du är redo, Jonas.
+                        Kryptan är öppen. Din data är säkrad. Ställ dina frågor när du är redo.
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -254,13 +247,14 @@
                 <div class="space-y-2">
                     <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5 mb-3"><i data-lucide="image" class="w-4 h-4 text-emerald-500"></i> Bildlagring (Cloudinary)</h3>
                     
-                    <button onclick="window.promptCloudinaryLogin()" class="w-full py-3 temple-input-bg border border-emerald-600/40 text-emerald-400 rounded-xl hover:bg-[#0d4737] transition-colors font-bold font-mono text-[10px] uppercase temple-shadow flex items-center justify-center gap-2">
-                        <i data-lucide="external-link" class="w-4 h-4"></i> Länka Cloudinary (30 Dagar)
+                    <button onclick="window.open('https://cloudinary.com/console/media_library', '_blank')" class="w-full py-3 temple-input-bg border border-emerald-600/40 text-emerald-400 rounded-xl hover:bg-[#0d4737] transition-colors font-bold font-mono text-[10px] uppercase temple-shadow flex items-center justify-center gap-2">
+                        <i data-lucide="external-link" class="w-4 h-4"></i> Öppna Cloudinary Bibliotek
                     </button>
                     
                     <div class="pt-3 space-y-2">
                         <input type="text" id="setting-cloud-name" placeholder="Ditt Cloudinary Name" oninput="localStorage.setItem('cloudinary_name', this.value)" class="w-full temple-input-bg temple-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
                         <input type="text" id="setting-cloud-preset" placeholder="Din Upload Preset (Unsigned)" oninput="localStorage.setItem('cloudinary_preset', this.value)" class="w-full temple-input-bg temple-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <p class="text-[9px] text-stone-500 font-mono italic leading-tight">Fylls i en gång. Appen använder dessa uppgifter för att synka dina bilder till molnet helt automatiskt.</p>
                     </div>
                 </div>
 
@@ -313,8 +307,7 @@
         let activeExercises = [];
         let activeNotesArray = []; 
         let activeImagesArray = []; 
-        let pendingImagesQueue = []; 
-        let isUploadingImages = false;
+        let pendingImagesQueue = []; // Den isolerade kön för lokala bilder
         
         let aktivtDatum = new Date().toISOString().split('T')[0];
         let autoSyncTimer = null;
@@ -401,12 +394,6 @@
         }
         function loggaUt() { auth.signOut().then(() => location.reload()); }
 
-        function promptCloudinaryLogin() { document.getElementById('cloudinary-modal').classList.remove('hidden'); }
-        function handleCloudinaryRedirect(doRedirect) {
-            document.getElementById('cloudinary-modal').classList.add('hidden');
-            if (doRedirect) { localStorage.setItem('cloudinary_session_start', Date.now()); window.open('https://cloudinary.com/console/media_library', '_blank'); }
-        }
-
         function byggKalender() {
             const grid = document.getElementById('calendar-grid'); if(!grid) return; grid.innerHTML = "";
             document.getElementById('calendar-month-year').innerText = `${manaderNamn[kalenderDatum.getMonth()]} ${kalenderDatum.getFullYear()}`;
@@ -440,6 +427,7 @@
             } else { if(confirm(`Ingen rit hittad för ${datumNyckel}. Vill du logga för denna dag nu?`)) { redigeraPass(datumNyckel); } }
         }
 
+        // --- AUTOSPARA (Rör inte pendingImagesQueue) ---
         function autoSparaData() { setSyncState('saving'); if (autoSyncTimer) clearTimeout(autoSyncTimer); autoSyncTimer = setTimeout(() => { sparaDagensRit(false); }, 1500); }
 
         function setSyncState(state) {
@@ -450,41 +438,8 @@
             lucide.createIcons();
         }
 
-        async function sparaDagensRit(visaAlert = false) {
+        function sparaDagensRit(visaAlert = false) {
             if (!currentUser) return;
-            
-            if (pendingImagesQueue.length > 0 && !isUploadingImages && navigator.onLine) {
-                isUploadingImages = true;
-                const cloudName = localStorage.getItem('cloudinary_name') || "";
-                const uploadPreset = localStorage.getItem('cloudinary_preset') || "";
-                
-                if(!cloudName || !uploadPreset) {
-                    alert("Fyll i Cloudinary Name & Preset först i inställningar för att synka bilderna.");
-                    isUploadingImages = false;
-                } else {
-                    document.getElementById('upload-spinner').classList.remove('hidden');
-                    for(let i=0; i<pendingImagesQueue.length; i++) {
-                        const pImg = pendingImagesQueue[i];
-                        const formData = new FormData();
-                        formData.append('file', pImg.file);
-                        formData.append('upload_preset', uploadPreset);
-                        formData.append('folder', 'PrimalPath');
-                        
-                        try {
-                            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData });
-                            const data = await response.json();
-                            if(data.secure_url) {
-                                activeImagesArray.push({ id: Math.random().toString(36).substring(2,7), url: data.secure_url, timestamp: Date.now() });
-                            }
-                        } catch(err) { console.error("Cloudinary Error", err); }
-                    }
-                    pendingImagesQueue = []; 
-                    renderImagesList();
-                    document.getElementById('upload-spinner').classList.add('hidden');
-                    isUploadingImages = false;
-                }
-            }
-
             const nyLogg = {
                 id: aktivtDatum, date: new Date().toISOString(), steps: parseInt(document.getElementById('today-steps').value) || 0,
                 exercises: activeExercises, notes: activeNotesArray, images: activeImagesArray,
@@ -507,7 +462,7 @@
             uppdateraAllaVyer();
         }
 
-        // --- BILDER LOKAL KÖ ---
+        // --- BILDER LOKAL KÖ & EXPLICIT UPPPLADDNING ---
         function laggBildIKo(event) {
             const files = event.target.files;
             if(!files || files.length === 0) return;
@@ -515,7 +470,6 @@
                 pendingImagesQueue.push({ id: 'temp_' + Date.now() + '_' + i, file: files[i], localUrl: URL.createObjectURL(files[i]) });
             }
             renderImagesList();
-            autoSparaData(); 
             event.target.value = ""; 
         }
 
@@ -529,10 +483,56 @@
             });
             pendingImagesQueue.forEach(pImg => {
                 let div = document.createElement('div'); div.className = "relative rounded-xl overflow-hidden border border-amber-500 h-20 bg-black opacity-70";
-                div.innerHTML = `<img src="${pImg.localUrl}" class="object-cover w-full h-full"><div class="absolute inset-0 flex items-center justify-center"><i data-lucide="hourglass" class="w-6 h-6 text-amber-500 animate-pulse"></i></div><button onclick="window.taBortBild('${pImg.id}', true)" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                div.innerHTML = `<img src="${pImg.localUrl}" class="object-cover w-full h-full"><div class="absolute inset-0 flex items-center justify-center"><i data-lucide="hourglass" class="w-6 h-6 text-amber-500"></i></div><button onclick="window.taBortBild('${pImg.id}', true)" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
                 container.appendChild(div);
             });
+            
+            // Visa/Dölj spara-knappen för bilder beroende på om kön har innehåll
+            if(pendingImagesQueue.length > 0) {
+                document.getElementById('save-images-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('save-images-btn').classList.add('hidden');
+            }
             lucide.createIcons();
+        }
+
+        async function sparaBildKo() {
+            if(pendingImagesQueue.length === 0) return;
+            const cloudName = localStorage.getItem('cloudinary_name') || "";
+            const uploadPreset = localStorage.getItem('cloudinary_preset') || "";
+
+            if(!cloudName || !uploadPreset) {
+                alert("Fyll i Cloudinary Name & Preset först i inställningar för att aktivera uppladdningen.");
+                switchTab('settings');
+                return;
+            }
+
+            document.getElementById('upload-spinner').classList.remove('hidden');
+            document.getElementById('save-images-btn').classList.add('opacity-50', 'pointer-events-none');
+
+            for(let i=0; i<pendingImagesQueue.length; i++) {
+                const pImg = pendingImagesQueue[i];
+                const formData = new FormData();
+                formData.append('file', pImg.file);
+                formData.append('upload_preset', uploadPreset);
+                formData.append('folder', 'PrimalPath'); // Skapar automatiskt mappen
+                
+                try {
+                    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData });
+                    const data = await response.json();
+                    if(data.secure_url) {
+                        activeImagesArray.push({ id: Math.random().toString(36).substring(2,7), url: data.secure_url, timestamp: Date.now() });
+                    }
+                } catch(err) { console.error("Cloudinary Error", err); }
+            }
+            
+            pendingImagesQueue = []; 
+            renderImagesList();
+            document.getElementById('upload-spinner').classList.add('hidden');
+            document.getElementById('save-images-btn').classList.remove('opacity-50', 'pointer-events-none');
+            
+            // Efter uppladdningen triggar vi ett vanligt sparande av riten så Cloudinary-URL:erna fästs permanent
+            sparaDagensRit(false);
         }
 
         function taBortBild(imgId, isPending) {
@@ -627,7 +627,7 @@
 
         function switchTab(tabId, btnElem) { document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500')); document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500')); document.getElementById(`view-${tabId}`).classList.add('active'); if(btnElem) { btnElem.classList.remove('text-stone-500'); btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); } lucide.createIcons(); if(tabId === 'rit') window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-        window.hanteraAuth = hanteraAuth; window.loggaUt = loggaUt; window.switchTab = switchTab; window.valjNyOvning = valjNyOvning; window.läggTillSet = läggTillSet; window.taBortSet = taBortSet; window.uppdateraSetData = uppdateraSetData; window.sparaDagensRit = sparaDagensRit; window.autoSparaData = autoSparaData; window.importeraMasterDataDirekt = importeraMasterDataDirekt; window.redigeraPass = redigeraPass; window.raderaPass = raderaPass; window.nollstallTillIdag = nollstallTillIdag; window.toggleCollapseCard = toggleCollapseCard; window.valjSidaForExercise = valjSidaForExercise; window.skickaChattMeddelande = skickaChattMeddelande; window.exporteraMasterDataLive = exporteraMasterDataLive; window.laggTillEnskildAnteckning = laggTillEnskildAnteckning; window.taBortEnskildAnteckning = taBortEnskildAnteckning; window.laggBildIKo = laggBildIKo; window.taBortBild = taBortBild; window.rensaIndexedDB = rensaIndexedDB; window.rensaSkarmForNyDag = rensaSkarmForNyDag; window.byggKalender = byggKalender; window.andraManad = andraManad; window.valjKalenderDag = valjKalenderDag; window.promptCloudinaryLogin = promptCloudinaryLogin; window.handleCloudinaryRedirect = handleCloudinaryRedirect;
+        window.hanteraAuth = hanteraAuth; window.loggaUt = loggaUt; window.switchTab = switchTab; window.valjNyOvning = valjNyOvning; window.läggTillSet = läggTillSet; window.taBortSet = taBortSet; window.uppdateraSetData = uppdateraSetData; window.sparaDagensRit = sparaDagensRit; window.autoSparaData = autoSparaData; window.importeraMasterDataDirekt = importeraMasterDataDirekt; window.redigeraPass = redigeraPass; window.raderaPass = raderaPass; window.nollstallTillIdag = nollstallTillIdag; window.toggleCollapseCard = toggleCollapseCard; window.valjSidaForExercise = valjSidaForExercise; window.skickaChattMeddelande = skickaChattMeddelande; window.exporteraMasterDataLive = exporteraMasterDataLive; window.laggTillEnskildAnteckning = laggTillEnskildAnteckning; window.taBortEnskildAnteckning = taBortEnskildAnteckning; window.laggBildIKo = laggBildIKo; window.taBortBild = taBortBild; window.sparaBildKo = sparaBildKo; window.rensaIndexedDB = rensaIndexedDB; window.rensaSkarmForNyDag = rensaSkarmForNyDag; window.byggKalender = byggKalender; window.andraManad = andraManad; window.valjKalenderDag = valjKalenderDag;
 
         lucide.createIcons();
     </script>
