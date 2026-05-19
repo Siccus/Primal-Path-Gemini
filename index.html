@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#021a14">
-    <title>Primal Path AI | Gen 2.0.0 Cloudinary Native</title>
+    <title>Primal Path AI | Gen 2.1.0 Offline First</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -21,7 +18,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: floatUp 0.25s ease-out forwards; }
         @keyframes floatUp { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
-        #map-placeholder { height: 340px; width: 100%; background: #01130e; }
         .chat-container { height: 320px; }
         
         /* Temple Aesthetics */
@@ -29,6 +25,9 @@
         .temple-bg { background-color: #03241b; }
         .temple-input-bg { background-color: #021611; }
         .temple-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3); }
+        
+        /* Säkerställer att kalenderdagar är klickbara */
+        .calendar-cell { position: relative; z-index: 10; pointer-events: auto; }
     </style>
 </head>
 <body class="font-sans antialiased pb-32">
@@ -53,6 +52,18 @@
         </div>
     </div>
 
+    <div id="cloudinary-modal" class="hidden fixed inset-0 bg-[#010f0c]/90 z-[200] flex items-center justify-center px-4 backdrop-blur-sm">
+        <div class="temple-bg temple-border p-6 rounded-2xl w-full max-w-sm space-y-4 text-center temple-shadow">
+            <div class="flex justify-center text-amber-500 mb-2"><i data-lucide="cloud-lightning" class="w-10 h-10"></i></div>
+            <h3 class="text-lg font-black text-white font-mono uppercase tracking-wide">Cloudinary Session</h3>
+            <p class="text-xs text-stone-300 font-mono leading-relaxed">Vill du bli vidareledd till Cloudinary för att logga in och stanna inloggad i 30 dagar?</p>
+            <div class="grid grid-cols-2 gap-3 mt-6">
+                <button onclick="window.handleCloudinaryRedirect(false)" class="py-3 bg-red-950/40 text-red-400 rounded-xl border border-red-900/50 text-xs font-mono font-bold uppercase transition-all hover:bg-red-900/40">Nej, Avbryt</button>
+                <button onclick="window.handleCloudinaryRedirect(true)" class="py-3 bg-emerald-900/80 text-emerald-400 rounded-xl border border-emerald-700 text-xs font-mono font-bold uppercase transition-all hover:bg-emerald-800">Ja, Vidareled</button>
+            </div>
+        </div>
+    </div>
+
     <div class="max-w-md mx-auto px-4 pt-6 space-y-5">
         
         <header class="flex justify-between items-center border-b border-[#053527] pb-3">
@@ -60,7 +71,7 @@
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">GEN 2.0.0 • OFFLINE FIRST</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">GEN 2.1.0 • OFFLINE FIRST</p>
             </div>
             <div class="flex items-center gap-3">
                 <div id="sync-indicator" class="text-amber-500 transition-all" title="Väntar på synk">
@@ -169,13 +180,19 @@
                 <p class="text-xs text-stone-400">Din råa historia bevarad.</p>
             </div>
             
-            <div class="grid grid-cols-3 gap-1 temple-bg p-1 rounded-xl temple-border text-center font-mono text-xs">
-                <button class="py-1.5 bg-[#0d4737] text-white rounded-lg font-bold">Dag</button>
-                <button class="py-1.5 text-stone-600 cursor-not-allowed">Vecka</button>
-                <button class="py-1.5 text-stone-600 cursor-not-allowed">Månad</button>
+            <div class="temple-bg temple-border p-4 rounded-2xl space-y-4 temple-shadow">
+                <div class="flex justify-between items-center">
+                    <button onclick="window.andraManad(-1)" class="p-2 text-emerald-500 hover:text-amber-500 transition-colors"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                    <h3 id="calendar-month-year" class="text-sm font-black text-white uppercase font-mono tracking-wider">Månad År</h3>
+                    <button onclick="window.andraManad(1)" class="p-2 text-emerald-500 hover:text-amber-500 transition-colors"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center font-mono text-[10px] text-stone-500 font-bold mb-1">
+                    <div>Mån</div><div>Tis</div><div>Ons</div><div>Tor</div><div>Fre</div><div>Lör</div><div>Sön</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
             </div>
 
-            <div id="historical-logs-anchor" class="space-y-4"></div>
+            <div id="historical-logs-anchor" class="space-y-4 pt-2"></div>
         </main>
 
         <main id="view-skadande" class="tab-content space-y-4">
@@ -226,10 +243,16 @@
             <div class="temple-bg temple-border p-4 rounded-2xl space-y-4">
                 
                 <div class="space-y-2">
-                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="image" class="w-4 h-4 text-emerald-500"></i> Bildlagring (Cloudinary)</h3>
-                    <input type="text" id="setting-cloud-name" placeholder="Ditt Cloudinary Name" oninput="localStorage.setItem('cloudinary_name', this.value)" class="w-full temple-input-bg temple-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                    <input type="text" id="setting-cloud-preset" placeholder="Din Upload Preset (Unsigned)" oninput="localStorage.setItem('cloudinary_preset', this.value)" class="w-full temple-input-bg temple-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
-                    <p class="text-[9px] text-stone-500 font-mono italic leading-tight">Zero cost architecture. Fyll i för att möjliggöra bilduppladdning.</p>
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5 mb-3"><i data-lucide="image" class="w-4 h-4 text-emerald-500"></i> Bildlagring (Cloudinary)</h3>
+                    
+                    <button onclick="window.promptCloudinaryLogin()" class="w-full py-3 temple-input-bg border border-emerald-600/40 text-emerald-400 rounded-xl hover:bg-[#0d4737] transition-colors font-bold font-mono text-[10px] uppercase temple-shadow flex items-center justify-center gap-2">
+                        <i data-lucide="external-link" class="w-4 h-4"></i> Länka Cloudinary (30 Dagar)
+                    </button>
+                    
+                    <div class="pt-3 space-y-2">
+                        <input type="text" id="setting-cloud-name" placeholder="Ditt Cloudinary Name" oninput="localStorage.setItem('cloudinary_name', this.value)" class="w-full temple-input-bg temple-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                        <input type="text" id="setting-cloud-preset" placeholder="Din Upload Preset (Unsigned)" oninput="localStorage.setItem('cloudinary_preset', this.value)" class="w-full temple-input-bg temple-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                    </div>
                 </div>
 
                 <div class="border-t border-[#0d4737]/60 pt-4 space-y-2">
@@ -285,14 +308,17 @@
         let activeNotesArray = []; 
         let activeImagesArray = []; 
         
-        // Strict ID formatted as YYYY-MM-DD
         let aktivtDatum = new Date().toISOString().split('T')[0];
         let autoSyncTimer = null;
         let collapsedCards = {};
+        
+        // Kalender State
+        let kalenderDatum = new Date();
+        const manaderNamn = ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"];
 
-        // --- INDEXED DB (OFFLINE FIRST ARCHITECTURE) ---
+        // --- INDEXED DB ---
         let db;
-        const dbRequest = indexedDB.open("PrimalPathDB", 2); // Bumped version for schema safety
+        const dbRequest = indexedDB.open("PrimalPathDB", 2); 
         dbRequest.onerror = (e) => console.error("IndexedDB error:", e);
         dbRequest.onupgradeneeded = (e) => {
             db = e.target.result;
@@ -325,7 +351,6 @@
             if(!db) return callback([]);
             const request = db.transaction(["logs"], "readonly").objectStore("logs").getAll();
             request.onsuccess = () => { 
-                // Sort descending by ID (which is YYYY-MM-DD)
                 callback(request.result.sort((a,b) => b.id.localeCompare(a.id))); 
             };
         }
@@ -334,34 +359,31 @@
         function initieraSystem() {
             if(!currentUser) return;
             
-            // Load Settings
             document.getElementById('setting-cloud-name').value = localStorage.getItem('cloudinary_name') || "";
             document.getElementById('setting-cloud-preset').value = localStorage.getItem('cloudinary_preset') || "";
 
-            // 1. Read Local Cache First (Offline First)
             getAllFromIDB((lokalData) => {
                 if(lokalData && lokalData.length > 0) {
                     logsData = lokalData;
                     renderJournalboken(); 
+                    byggKalender();
                     beraknaStegStatistik(); 
                     laddaInDatumTillInputs(aktivtDatum, false);
                 }
             });
 
-            // 2. Setup Firebase Realtime Listener
             database.ref(`users/${currentUser.uid}/logs`).on('value', snapshot => {
                 const data = snapshot.val();
                 if(data) {
                     const molnLogs = Object.values(data);
-                    // Sync cloud data to local IDB
                     molnLogs.forEach(log => saveToIDB(log)); 
                     
                     logsData = molnLogs.sort((a,b) => b.id.localeCompare(a.id));
                     
                     renderJournalboken(); 
+                    byggKalender();
                     beraknaStegStatistik();
                     
-                    // Update active inputs if not currently typing
                     const currentInput = document.getElementById('today-notes-input').value;
                     if(!currentInput) {
                         laddaInDatumTillInputs(aktivtDatum, false);
@@ -370,20 +392,17 @@
                 }
             });
 
-            // Setup Online/Offline listeners
             window.addEventListener('online', () => setSyncState('synced'));
             window.addEventListener('offline', () => setSyncState('offline'));
         }
 
-        // --- AUTHENTICATION ---
+        // --- AUTH ---
         function hanteraAuth(typ) {
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
             const errBox = document.getElementById('auth-error');
             errBox.innerText = "";
-            
             if(!email || !password) return errBox.innerText = "Templet kräver fullständiga uppgifter.";
-            
             if(typ === 'LOGGA_IN') {
                 auth.signInWithEmailAndPassword(email, password).catch(err => errBox.innerText = err.message);
             } else {
@@ -392,10 +411,103 @@
                 }).catch(err => errBox.innerText = err.message);
             }
         }
-
         function loggaUt() { auth.signOut().then(() => location.reload()); }
 
-        // --- SYNC & SAVE LOGIC ---
+        // --- KALENDER LOGIK (PALETTO STYLE) ---
+        function byggKalender() {
+            const grid = document.getElementById('calendar-grid');
+            if(!grid) return;
+            grid.innerHTML = "";
+            document.getElementById('calendar-month-year').innerText = `${manaderNamn[kalenderDatum.getMonth()]} ${kalenderDatum.getFullYear()}`;
+            
+            const ar = kalenderDatum.getFullYear(); 
+            const manad = kalenderDatum.getMonth();
+            // Måndag = 0, Söndag = 6
+            const forstaDagenIndex = (new Date(ar, manad, 1).getDay() + 6) % 7;
+            const antalDagar = new Date(ar, manad + 1, 0).getDate();
+            
+            for (let i = 0; i < forstaDagenIndex; i++) { 
+                grid.innerHTML += `<div class="p-2 min-h-[44px]"></div>`; 
+            }
+
+            const idag = new Date();
+            for (let d = 1; d <= antalDagar; d++) {
+                const datumNyckel = `${ar}-${String(manad + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isToday = (ar === idag.getFullYear() && manad === idag.getMonth() && d === idag.getDate());
+                
+                const dagensLogg = logsData.find(l => l.id === datumNyckel);
+                const hasData = !!dagensLogg;
+                
+                let dotHtml = '';
+                if(hasData) {
+                    dotHtml = `<div class="w-1.5 h-1.5 bg-amber-500 rounded-full mx-auto mt-1 shadow-[0_0_4px_#f59e0b]"></div>`;
+                }
+
+                let classes = "calendar-cell p-2 min-h-[44px] rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-all ";
+                
+                if (datumNyckel === aktivtDatum) {
+                    classes += "border-amber-500 bg-amber-950/30 text-amber-500 font-black ";
+                } else if (isToday) {
+                    classes += "border-emerald-500 text-emerald-500 font-bold bg-[#021611] ";
+                } else {
+                    classes += "border-[#0d4737]/40 bg-[#021611] text-stone-400 hover:border-emerald-700 hover:text-emerald-400 ";
+                }
+
+                const cell = document.createElement('div');
+                cell.className = classes;
+                cell.innerHTML = `<span class="text-xs font-mono">${d}</span>${dotHtml}`;
+                
+                // Explicit klick-lyssnare direkt på DOM-noden kringgår problem
+                cell.onclick = (e) => {
+                    e.stopPropagation();
+                    window.valjKalenderDag(datumNyckel);
+                };
+                
+                grid.appendChild(cell);
+            }
+        }
+
+        function andraManad(riktning) { 
+            kalenderDatum.setMonth(kalenderDatum.getMonth() + riktning); 
+            byggKalender(); 
+        }
+
+        function valjKalenderDag(datumNyckel) {
+            const logg = logsData.find(l => l.id === datumNyckel);
+            
+            if(logg) {
+                // Rulla till loggen i listan
+                const card = document.getElementById(`log-card-${datumNyckel}`);
+                if(card) {
+                    collapsedCards[datumNyckel] = false; // Öppna kortet
+                    renderJournalboken(); // Rita om så det syns
+                    setTimeout(() => {
+                        document.getElementById(`log-card-${datumNyckel}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                }
+            } else {
+                // Tom dag -> Fråga om man vill skriva
+                if(confirm(`Ingen rit hittad för ${datumNyckel}. Vill du logga för denna dag nu?`)) {
+                    redigeraPass(datumNyckel);
+                }
+            }
+        }
+
+        // --- CLOUDINARY MODAL LOGIK ---
+        function promptCloudinaryLogin() {
+            document.getElementById('cloudinary-modal').classList.remove('hidden');
+        }
+
+        function handleCloudinaryRedirect(doRedirect) {
+            document.getElementById('cloudinary-modal').classList.add('hidden');
+            if (doRedirect) {
+                // Sätt en flagga i localStorage för att minnas att vi startat en session
+                localStorage.setItem('cloudinary_session_start', Date.now());
+                window.open('https://cloudinary.com/console/media_library', '_blank');
+            }
+        }
+
+        // --- SYNC & SAVE ---
         function autoSparaData() {
             setSyncState('saving');
             if (autoSyncTimer) clearTimeout(autoSyncTimer);
@@ -422,48 +534,46 @@
 
         function sparaDagensRit(visaAlert = false) {
             if (!currentUser) return;
-            
-            // Build the JSON schema strictly based on requirements
             const nyLogg = {
                 id: aktivtDatum,
                 date: new Date().toISOString(),
                 steps: parseInt(document.getElementById('today-steps').value) || 0,
-                exercises: activeExercises, // side is already on exercise level
+                exercises: activeExercises,
                 notes: activeNotesArray, 
                 images: activeImagesArray,
                 subjectiveFeel: {
                     energyLevel: parseInt(document.getElementById('slider-livskraft').value),
                     sleepQuality: parseInt(document.getElementById('slider-drommar').value),
                     mentalFocus: parseInt(document.getElementById('slider-veder').value),
-                    mentalState: "", 
-                    freeText: ""
+                    mentalState: "", freeText: ""
                 },
                 lastUpdated: Date.now()
             };
             
-            // 1. Save to Local IndexedDB instantly
             saveToIDB(nyLogg); 
 
-            // 2. Sync to Firebase if online
             if (navigator.onLine) {
                 database.ref(`users/${currentUser.uid}/logs/${aktivtDatum}`).set(nyLogg).then(() => {
-                    raknaOmVolym(); 
-                    setSyncState('synced');
+                    raknaOmVolym(); setSyncState('synced');
                     if (visaAlert) { 
                         alert(`Rit sparad och säkrad! ✓`); 
                         if(aktivtDatum === new Date().toISOString().split('T')[0]) nollstallTillIdag(); 
                     }
-                }).catch(err => {
-                    console.error("Firebase Sync Error", err);
-                    setSyncState('offline');
-                });
+                }).catch(err => { setSyncState('offline'); });
             } else {
-                setSyncState('offline');
-                raknaOmVolym();
+                setSyncState('offline'); raknaOmVolym();
             }
+            
+            // Uppdatera logsData lokalt så UI reagerar direkt
+            const idx = logsData.findIndex(l => l.id === aktivtDatum);
+            if (idx !== -1) logsData[idx] = nyLogg;
+            else logsData.push(nyLogg);
+            logsData.sort((a,b) => b.id.localeCompare(a.id));
+            
+            byggKalender(); // Uppdatera dots i kalendern
         }
 
-        // --- CLOUDINARY INTEGRATION ---
+        // --- BILDER ---
         async function laddaUppBild(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -472,8 +582,8 @@
             const uploadPreset = localStorage.getItem('cloudinary_preset') || "";
 
             if(!cloudName || !uploadPreset) {
-                alert("Gå till Inställningar och fyll i ditt Cloudinary Name & Preset först för att aktivera uppladdning.");
-                switchTab('settings', document.querySelector('button[onclick*="switchTab(\'settings\'"]'));
+                alert("Fyll i Cloudinary Name & Preset först.");
+                switchTab('settings');
                 return;
             }
 
@@ -490,31 +600,20 @@
                 
                 if(data.secure_url) {
                     activeImagesArray.push({ id: Math.random().toString(36).substring(2,7), url: data.secure_url, timestamp: Date.now() });
-                    renderImagesList();
-                    autoSparaData();
-                } else {
-                    alert("Fel vid bilduppladdning. Kontrollera inställningarna.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Uppladdning misslyckades.");
-            } finally {
+                    renderImagesList(); autoSparaData();
+                } else { alert("Fel vid bilduppladdning."); }
+            } catch (err) { alert("Uppladdning misslyckades."); } 
+            finally {
                 document.getElementById('upload-spinner').classList.add('hidden');
                 event.target.value = ""; 
             }
         }
 
         function renderImagesList() {
-            const container = document.getElementById('active-images-list'); 
-            container.innerHTML = "";
+            const container = document.getElementById('active-images-list'); container.innerHTML = "";
             activeImagesArray.forEach(img => {
-                let div = document.createElement('div'); 
-                div.className = "relative rounded-xl overflow-hidden border border-[#0d4737] h-20 bg-black";
-                
-                // Use the object's url if it's an object, otherwise fallback (to support legacy string arrays if any)
-                let imgUrl = typeof img === 'string' ? img : img.url;
-                let imgId = typeof img === 'string' ? Math.random().toString(36).substring(2,7) : img.id;
-
+                let div = document.createElement('div'); div.className = "relative rounded-xl overflow-hidden border border-[#0d4737] h-20 bg-black";
+                let imgUrl = typeof img === 'string' ? img : img.url; let imgId = typeof img === 'string' ? Math.random().toString(36).substring(2,7) : img.id;
                 div.innerHTML = `
                     <img src="${imgUrl}" class="object-cover w-full h-full opacity-80 hover:opacity-100 transition-opacity">
                     <button onclick="window.taBortBild('${imgId}')" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
@@ -523,172 +622,58 @@
             lucide.createIcons();
         }
 
-        function taBortBild(imgId) {
-            activeImagesArray = activeImagesArray.filter(i => (i.id !== imgId && typeof i !== 'string'));
-            renderImagesList(); 
-            autoSparaData();
-        }
+        function taBortBild(imgId) { activeImagesArray = activeImagesArray.filter(i => (i.id !== imgId && typeof i !== 'string')); renderImagesList(); autoSparaData(); }
 
-        // --- NOTES LOGIC ---
+        // --- ANTECKNINGAR ---
         function laggTillEnskildAnteckning() {
-            const input = document.getElementById('today-notes-input');
-            const txt = input.value.trim();
-            if(!txt) return;
-            
-            activeNotesArray.push({ 
-                id: Math.random().toString(36).substring(2,7), 
-                text: txt, 
-                timestamp: Date.now() 
-            });
-            input.value = ""; 
-            input.style.height = '36px'; 
-            renderNotesList(); 
-            sparaDagensRit(false);
+            const input = document.getElementById('today-notes-input'); const txt = input.value.trim(); if(!txt) return;
+            activeNotesArray.push({ id: Math.random().toString(36).substring(2,7), text: txt, timestamp: Date.now() });
+            input.value = ""; input.style.height = '36px'; renderNotesList(); sparaDagensRit(false);
         }
-
-        function taBortEnskildAnteckning(noteId) {
-            activeNotesArray = activeNotesArray.filter(n => n.id !== noteId);
-            renderNotesList(); 
-            autoSparaData();
-        }
-
+        function taBortEnskildAnteckning(noteId) { activeNotesArray = activeNotesArray.filter(n => n.id !== noteId); renderNotesList(); autoSparaData(); }
         function renderNotesList() {
-            const container = document.getElementById('active-notes-list'); 
-            container.innerHTML = "";
+            const container = document.getElementById('active-notes-list'); container.innerHTML = "";
             activeNotesArray.forEach(n => {
                 const noteTime = n.timestamp ? new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : '';
-                let d = document.createElement('div'); 
-                d.className = "flex justify-between items-center temple-input-bg p-2 rounded-xl border border-[#0d4737]/40 text-xs text-stone-300 font-mono";
-                d.innerHTML = `<span><span class="text-stone-500 mr-1.5">${noteTime}</span>${n.text}</span>
-                               <button onclick="window.taBortEnskildAnteckning('${n.id}')" class="text-stone-600 hover:text-red-400 px-1"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                let d = document.createElement('div'); d.className = "flex justify-between items-center temple-input-bg p-2 rounded-xl border border-[#0d4737]/40 text-xs text-stone-300 font-mono";
+                d.innerHTML = `<span><span class="text-stone-500 mr-1.5">${noteTime}</span>${n.text}</span><button onclick="window.taBortEnskildAnteckning('${n.id}')" class="text-stone-600 hover:text-red-400 px-1"><i data-lucide="x" class="w-3 h-3"></i></button>`;
                 container.appendChild(d);
             });
             lucide.createIcons();
         }
 
-        // --- WORKOUT BUILDER (Strict Schema Compliance) ---
-        function valjSidaForExercise(exId, valdSida) { 
-            const ex = activeExercises.find(e => e.id === exId); 
-            if (ex) { 
-                ex.side = valdSida; // Side strictly on exercise level
-                renderActiveWorkoutBuilder(); 
-                autoSparaData(); 
-            } 
-        }
-
+        // --- TRÄNINGSBUILDER ---
+        function valjSidaForExercise(exId, valdSida) { const ex = activeExercises.find(e => e.id === exId); if (ex) { ex.side = valdSida; renderActiveWorkoutBuilder(); autoSparaData(); } }
         function valjNyOvning() { 
-            const sel = document.getElementById('exercise-selector'); 
-            if (!sel.value) return; 
-            
-            activeExercises.push({ 
-                id: Math.random().toString(36).substring(2,7), 
-                name: sel.value, 
-                metric: "reps", 
-                side: "both", // Default
-                sets: [{ reps: 10, weight: 21 }],
-                timestamp: Date.now()
-            }); 
-            
-            sel.value = ""; 
-            renderActiveWorkoutBuilder(); 
-            raknaOmVolym(); 
-            autoSparaData(); 
+            const sel = document.getElementById('exercise-selector'); if (!sel.value) return; 
+            activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: sel.value, metric: "reps", side: "both", sets: [{ reps: 10, weight: 21 }], timestamp: Date.now() }); 
+            sel.value = ""; renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); 
         }
-
-        function läggTillSet(exId) { 
-            const ex = activeExercises.find(e => e.id === exId); 
-            if (!ex) return; 
-            const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 21 }; 
-            ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight }); 
-            renderActiveWorkoutBuilder(); 
-            raknaOmVolym(); 
-            autoSparaData(); 
-        }
-
-        function taBortSet(exId, setIdx) { 
-            const ex = activeExercises.find(e => e.id === exId); 
-            if (!ex) return; 
-            ex.sets.splice(setIdx, 1); 
-            if (ex.sets.length === 0) activeExercises = activeExercises.filter(e => e.id !== exId); 
-            renderActiveWorkoutBuilder(); 
-            raknaOmVolym(); 
-            autoSparaData(); 
-        }
-
-        function uppdateraSetData(exId, setIdx, fält, värde) { 
-            const ex = activeExercises.find(e => e.id === exId); 
-            if (ex && ex.sets[setIdx]) ex.sets[setIdx][fält] = parseFloat(värde) || 0; 
-            raknaOmVolym(); 
-            autoSparaData(); 
-        }
+        function läggTillSet(exId) { const ex = activeExercises.find(e => e.id === exId); if (!ex) return; const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 21 }; ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight }); renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
+        function taBortSet(exId, setIdx) { const ex = activeExercises.find(e => e.id === exId); if (!ex) return; ex.sets.splice(setIdx, 1); if (ex.sets.length === 0) activeExercises = activeExercises.filter(e => e.id !== exId); renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
+        function uppdateraSetData(exId, setIdx, fält, värde) { const ex = activeExercises.find(e => e.id === exId); if (ex && ex.sets[setIdx]) ex.sets[setIdx][fält] = parseFloat(värde) || 0; raknaOmVolym(); autoSparaData(); }
 
         function renderActiveWorkoutBuilder() {
-            const container = document.getElementById('active-workout-builder'); 
-            container.innerHTML = "";
+            const container = document.getElementById('active-workout-builder'); container.innerHTML = "";
             activeExercises.forEach(ex => {
-                const currentSide = ex.side || "both"; 
-                let card = document.createElement('div'); 
-                card.className = "temple-input-bg border border-[#0d4737] rounded-xl p-3 space-y-2";
-                
-                card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-[#0d4737]/60 pb-1">
-                        <span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide">
-                            <i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}
-                        </span>
-                        <div class="flex items-center gap-1 font-mono text-[9px] font-bold">
-                            <button onclick="window.valjSidaForExercise('${ex.id}', 'left')" class="px-2 py-0.5 rounded ${currentSide === 'left' ? 'bg-amber-600 text-white' : 'temple-bg text-stone-500'}">V</button>
-                            <button onclick="window.valjSidaForExercise('${ex.id}', 'both')" class="px-2 py-0.5 rounded ${currentSide === 'both' ? 'bg-emerald-700 text-white' : 'temple-bg text-stone-500'}">B</button>
-                            <button onclick="window.valjSidaForExercise('${ex.id}', 'right')" class="px-2 py-0.5 rounded ${currentSide === 'right' ? 'bg-amber-600 text-white' : 'temple-bg text-stone-500'}">H</button>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5">
-                        ${ex.sets.map((set, idx) => `
-                        <div class="flex items-center justify-between bg-[#03241b]/40 p-2 rounded-lg border border-[#0d4737]/30 gap-2 font-mono text-xs">
-                            <span class="text-[10px] text-emerald-700 font-bold">#${idx + 1}</span>
-                            <div class="flex items-center gap-1.5 flex-1 justify-end">
-                                <input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 temple-input-bg temple-border rounded text-center py-0.5 text-white focus:outline-none">
-                                <span class="text-[9px] text-stone-500">reps</span>
-                                <input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 temple-input-bg temple-border rounded text-center py-0.5 text-white focus:outline-none">
-                                <span class="text-[9px] text-stone-500">kg</span>
-                                <button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button>
-                            </div>
-                        </div>`).join('')}
-                    </div>
-                    <button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 temple-bg text-stone-400 text-[10px] font-mono rounded-lg border border-[#0d4737] mt-1.5">+ SET</button>`;
+                const currentSide = ex.side || "both"; let card = document.createElement('div'); card.className = "temple-input-bg border border-[#0d4737] rounded-xl p-3 space-y-2";
+                card.innerHTML = `<div class="flex justify-between items-center border-b border-[#0d4737]/60 pb-1"><span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide"><i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}</span><div class="flex items-center gap-1 font-mono text-[9px] font-bold"><button onclick="window.valjSidaForExercise('${ex.id}', 'left')" class="px-2 py-0.5 rounded ${currentSide === 'left' ? 'bg-amber-600 text-white' : 'temple-bg text-stone-500'}">V</button><button onclick="window.valjSidaForExercise('${ex.id}', 'both')" class="px-2 py-0.5 rounded ${currentSide === 'both' ? 'bg-emerald-700 text-white' : 'temple-bg text-stone-500'}">B</button><button onclick="window.valjSidaForExercise('${ex.id}', 'right')" class="px-2 py-0.5 rounded ${currentSide === 'right' ? 'bg-amber-600 text-white' : 'temple-bg text-stone-500'}">H</button></div></div><div class="space-y-1.5">${ex.sets.map((set, idx) => `<div class="flex items-center justify-between bg-[#03241b]/40 p-2 rounded-lg border border-[#0d4737]/30 gap-2 font-mono text-xs"><span class="text-[10px] text-emerald-700 font-bold">#${idx + 1}</span><div class="flex items-center gap-1.5 flex-1 justify-end"><input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 temple-input-bg temple-border rounded text-center py-0.5 text-white focus:outline-none"><span class="text-[9px] text-stone-500">reps</span><input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 temple-input-bg temple-border rounded text-center py-0.5 text-white focus:outline-none"><span class="text-[9px] text-stone-500">kg</span><button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button></div></div>`).join('')}</div><button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 temple-bg text-stone-400 text-[10px] font-mono rounded-lg border border-[#0d4737] mt-1.5">+ SET</button>`;
                 container.appendChild(card);
             });
             lucide.createIcons();
         }
 
-        function raknaOmVolym() { 
-            let total = 0; 
-            activeExercises.forEach(ex => ex.sets.forEach(s => total += (s.reps*s.weight))); 
-            document.getElementById('live-vol-display').innerText = `${total.toLocaleString('sv-SE')} kg`; 
-        }
+        function raknaOmVolym() { let total = 0; activeExercises.forEach(ex => ex.sets.forEach(s => total += (s.reps*s.weight))); document.getElementById('live-vol-display').innerText = `${total.toLocaleString('sv-SE')} kg`; }
 
-        // --- DATE MANAGEMENT ---
-        function rensaSkarmForNyDag() {
-            if(confirm("Vill du rensa skärmen? (Din data är redan säker i kryptan)")) {
-                nollstallTillIdag();
-            }
-        }
-
+        // --- DATUM ---
+        function rensaSkarmForNyDag() { if(confirm("Vill du rensa skärmen?")) nollstallTillIdag(); }
         function redigeraPass(dateId) {
-            aktivtDatum = dateId; 
-            laddaInDatumTillInputs(dateId, true);
-            document.getElementById('edit-date-banner').classList.remove('hidden'); 
-            document.getElementById('edit-date-display').innerText = dateId;
-            
-            switchTab('rit', document.querySelector('button[onclick*="switchTab(\'rit\'"]')); 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            aktivtDatum = dateId; laddaInDatumTillInputs(dateId, true);
+            document.getElementById('edit-date-banner').classList.remove('hidden'); document.getElementById('edit-date-display').innerText = dateId;
+            switchTab('rit', document.querySelector('button[onclick*="switchTab(\'rit\'"]')); window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        function nollstallTillIdag() {
-            aktivtDatum = new Date().toISOString().split('T')[0];
-            document.getElementById('edit-date-banner').classList.add('hidden');
-            laddaInDatumTillInputs(aktivtDatum, false);
-        }
-
+        function nollstallTillIdag() { aktivtDatum = new Date().toISOString().split('T')[0]; document.getElementById('edit-date-banner').classList.add('hidden'); laddaInDatumTillInputs(aktivtDatum, false); kalenderDatum = new Date(); byggKalender(); }
+        
         function laddaInDatumTillInputs(dateId, tvingaLaddning = false) {
             const pass = logsData.find(l => l.id === dateId);
             if (pass) {
@@ -700,125 +685,62 @@
                 document.getElementById('slider-veder').value = pass.subjectiveFeel?.mentalFocus || 9;
                 activeExercises = pass.exercises || [];
             } else if (!tvingaLaddning) {
-                document.getElementById('today-steps').value = ""; 
-                document.getElementById('today-notes-input').value = "";
-                activeNotesArray = []; 
-                activeExercises = []; 
-                activeImagesArray = [];
-                document.getElementById('slider-livskraft').value = 8; 
-                document.getElementById('slider-drommar').value = 8; 
-                document.getElementById('slider-veder').value = 9;
+                document.getElementById('today-steps').value = ""; document.getElementById('today-notes-input').value = "";
+                activeNotesArray = []; activeExercises = []; activeImagesArray = [];
+                document.getElementById('slider-livskraft').value = 8; document.getElementById('slider-drommar').value = 8; document.getElementById('slider-veder').value = 9;
             }
-            
             document.getElementById('val-livskraft').innerText = document.getElementById('slider-livskraft').value;
             document.getElementById('val-drommar').innerText = document.getElementById('slider-drommar').value;
             document.getElementById('val-veder').innerText = document.getElementById('slider-veder').value;
-            
-            renderNotesList(); 
-            renderImagesList(); 
-            renderActiveWorkoutBuilder(); 
-            raknaOmVolym();
+            renderNotesList(); renderImagesList(); renderActiveWorkoutBuilder(); raknaOmVolym();
         }
 
-        // --- JOURNAL & STATS ---
-        function toggleCollapseCard(dateId) { 
-            collapsedCards[dateId] = !collapsedCards[dateId]; 
-            renderJournalboken(); 
-        }
-
+        // --- JOURNAL LOGIK ---
+        function toggleCollapseCard(dateId) { collapsedCards[dateId] = !collapsedCards[dateId]; renderJournalboken(); }
         function raderaPass(dateId) {
-            if (!currentUser || !confirm(`Är du säker på att du vill radera hela riten för ${dateId} permanent?`)) return;
-            
+            if (!currentUser || !confirm(`Radera riten för ${dateId} permanent?`)) return;
             database.ref(`users/${currentUser.uid}/logs/${dateId}`).remove().then(() => {
-                if(db) { 
-                    db.transaction(["logs"], "readwrite").objectStore("logs").delete(dateId); 
-                }
+                if(db) { db.transaction(["logs"], "readwrite").objectStore("logs").delete(dateId); }
                 if (aktivtDatum === dateId) nollstallTillIdag();
             });
         }
 
         function renderJournalboken() {
-            const anchor = document.getElementById('historical-logs-anchor'); 
-            if (!anchor) return;
-            
-            if (logsData.length === 0) { 
-                anchor.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Kryptan är tom.</p>"; 
-                return; 
-            }
-            
+            const anchor = document.getElementById('historical-logs-anchor'); if (!anchor) return;
+            if (logsData.length === 0) { anchor.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Kryptan är tom.</p>"; return; }
             anchor.innerHTML = "";
-            const manader = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEC"]; 
-            const dagarVecka = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
+            const manader = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEC"]; const dagarVecka = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
 
             logsData.forEach(log => {
                 let passVolym = 0, rows = "";
                 if (log.exercises) {
                     log.exercises.forEach(ex => {
-                        let labels = []; 
-                        let sideCode = "B"; 
-                        if(ex.side === "left") sideCode = "V"; 
-                        if(ex.side === "right") sideCode = "H";
-                        
-                        ex.sets?.forEach(s => { 
-                            passVolym += (s.reps*s.weight); 
-                            labels.push(`${s.reps} reps x ${s.weight}kg`); 
-                        });
-                        
+                        let labels = []; let sideCode = "B"; if(ex.side === "left") sideCode = "V"; if(ex.side === "right") sideCode = "H";
+                        ex.sets?.forEach(s => { passVolym += (s.reps*s.weight); labels.push(`${s.reps} reps x ${s.weight}kg`); });
                         const sideBadge = sideCode !== 'B' ? `<span class="text-amber-500 border border-amber-500/20 px-1 rounded bg-amber-950/10 text-[9px] font-bold ml-1.5">${sideCode}</span>` : '';
-                        
-                        rows += `<div class="py-2.5 border-b border-[#0d4737]/20 last:border-0 font-mono text-xs">
-                                    <div class="flex justify-between items-center mb-1">
-                                        <span class="text-white font-black uppercase flex items-center">${ex.name} ${sideBadge}</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-1.5">
-                                        ${labels.map(l => `<span class="temple-input-bg text-stone-400 px-2 py-1 rounded border border-[#0d4737]/40 text-[11px]">${l}</span>`).join('')}
-                                    </div>
-                                 </div>`;
+                        rows += `<div class="py-2.5 border-b border-[#0d4737]/20 last:border-0 font-mono text-xs"><div class="flex justify-between items-center mb-1"><span class="text-white font-black uppercase flex items-center">${ex.name} ${sideBadge}</span></div><div class="flex flex-wrap gap-1.5">${labels.map(l => `<span class="temple-input-bg text-stone-400 px-2 py-1 rounded border border-[#0d4737]/40 text-[11px]">${l}</span>`).join('')}</div></div>`;
                     });
                 }
                 
-                let isCollapsed = collapsedCards[log.id] !== false; // Default to collapsed
-                let chevronIkon = isCollapsed ? "chevron-down" : "chevron-up";
-                const parts = log.id.split('-'); 
-                const dagNummer = parts[2] || "01"; 
-                const manadStr = manader[parseInt(parts[1]) - 1] || "MAJ"; 
-                const veckodag = dagarVecka[new Date(log.id).getDay()] || "Måndag";
+                let isCollapsed = collapsedCards[log.id] !== false; let chevronIkon = isCollapsed ? "chevron-down" : "chevron-up";
+                const parts = log.id.split('-'); const dagNummer = parts[2] || "01"; const manadStr = manader[parseInt(parts[1]) - 1] || "MAJ"; const veckodag = dagarVecka[new Date(log.id).getDay()] || "Måndag";
 
                 let notesHtml = "";
-                if(Array.isArray(log.notes)) { 
-                    log.notes.forEach(n => { 
-                        let timeLabel = n.timestamp ? new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : ''; 
-                        notesHtml += `<div class="text-xs text-stone-300 font-sans leading-relaxed mb-2 last:mb-0"><span class="text-stone-500 font-mono text-[10px] mr-2">${timeLabel}</span>${n.text}</div>`; 
-                    }); 
-                }
+                if(Array.isArray(log.notes)) { log.notes.forEach(n => { let timeLabel = n.timestamp ? new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : ''; notesHtml += `<div class="text-xs text-stone-300 font-sans leading-relaxed mb-2 last:mb-0"><span class="text-stone-500 font-mono text-[10px] mr-2">${timeLabel}</span>${n.text}</div>`; }); }
                 
                 let imagesHtml = "";
                 if(Array.isArray(log.images) && log.images.length > 0) {
-                    imagesHtml = `<div class="grid grid-cols-3 gap-2 mt-2">
-                        ${log.images.map(img => {
-                            let src = typeof img === 'string' ? img : img.url;
-                            return `<img src="${src}" class="rounded-lg border border-[#0d4737] object-cover h-16 w-full opacity-80 hover:opacity-100">`;
-                        }).join('')}</div>`;
+                    imagesHtml = `<div class="grid grid-cols-3 gap-2 mt-2">${log.images.map(img => { let src = typeof img === 'string' ? img : img.url; return `<img src="${src}" class="rounded-lg border border-[#0d4737] object-cover h-16 w-full opacity-80 hover:opacity-100">`; }).join('')}</div>`;
                 }
 
-                let div = document.createElement('div'); 
-                div.className = "temple-bg temple-border rounded-2xl shadow-xl overflow-hidden";
+                let div = document.createElement('div'); div.className = "temple-bg temple-border rounded-2xl shadow-xl overflow-hidden"; div.id = `log-card-${log.id}`;
                 div.innerHTML = `
                     <div class="p-4 flex justify-between items-center cursor-pointer hover:bg-[#053527]/20 transition-colors" onclick="window.toggleCollapseCard('${log.id}')">
                         <div class="flex items-center gap-3.5">
-                            <div class="temple-input-bg temple-border rounded-xl px-2.5 py-1 text-center font-mono w-14">
-                                <span class="text-[9px] text-stone-500 uppercase block font-bold tracking-wider">${manadStr}</span>
-                                <span class="text-lg font-black text-white leading-none block mt-0.5">${dagNummer}</span>
-                            </div>
-                            <div>
-                                <span class="text-sm font-black text-white block">${veckodag}</span>
-                                <span class="text-[9px] font-mono text-stone-400 uppercase tracking-wide flex items-center gap-1.5 mt-0.5">👣 ${log.steps || 0} • 💬 ${log.subjectiveFeel?.energyLevel || 8}/10 • ⚡ ${passVolym.toLocaleString('sv-SE')} kg</span>
-                            </div>
+                            <div class="temple-input-bg temple-border rounded-xl px-2.5 py-1 text-center font-mono w-14"><span class="text-[9px] text-stone-500 uppercase block font-bold tracking-wider">${manadStr}</span><span class="text-lg font-black text-white leading-none block mt-0.5">${dagNummer}</span></div>
+                            <div><span class="text-sm font-black text-white block">${veckodag}</span><span class="text-[9px] font-mono text-stone-400 uppercase tracking-wide flex items-center gap-1.5 mt-0.5">👣 ${log.steps || 0} • 💬 ${log.subjectiveFeel?.energyLevel || 8}/10 • ⚡ ${passVolym.toLocaleString('sv-SE')} kg</span></div>
                         </div>
-                        <div class="flex items-center gap-3 font-mono text-right" onclick="event.stopPropagation();">
-                            <button onclick="window.redigeraPass('${log.id}')" class="text-stone-400 hover:text-amber-500 transition-colors mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <i data-lucide="${chevronIkon}" class="w-5 h-5 text-emerald-500"></i>
-                        </div>
+                        <div class="flex items-center gap-3 font-mono text-right" onclick="event.stopPropagation();"><button onclick="window.redigeraPass('${log.id}')" class="text-stone-400 hover:text-amber-500 transition-colors mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button><i data-lucide="${chevronIkon}" class="w-5 h-5 text-emerald-500"></i></div>
                     </div>
                     <div class="${isCollapsed ? 'hidden' : 'p-4 bg-[#021611]/50 border-t border-[#0d4737]/40 space-y-4'}">
                         <div class="grid grid-cols-2 gap-2 font-mono text-xs">
@@ -837,120 +759,64 @@
         }
 
         function beraknaStegStatistik() {
-            let sIdag = 0, sVecka = 0, sManad = 0, sAr = 0, sTotal = 0; 
-            const idagStr = new Date().toISOString().split('T')[0];
-            
+            let sIdag = 0, sVecka = 0, sManad = 0, sAr = 0, sTotal = 0; const idagStr = new Date().toISOString().split('T')[0];
             logsData.forEach(log => {
-                const s = parseInt(log.steps) || 0; 
-                sTotal += s; 
-                if (log.id === idagStr) sIdag = s;
-                
+                const s = parseInt(log.steps) || 0; sTotal += s; if (log.id === idagStr) sIdag = s;
                 const diff = Math.ceil(Math.abs(new Date() - new Date(log.id)) / (1000 * 60 * 60 * 24));
-                if (diff <= 7) sVecka += s; 
-                if (diff <= 30) sManad += s; 
-                if (diff <= 365) sAr += s;
+                if (diff <= 7) sVecka += s; if (diff <= 30) sManad += s; if (diff <= 365) sAr += s;
             });
-            
-            document.getElementById('steg-idag').innerText = sIdag.toLocaleString('sv-SE'); 
-            document.getElementById('steg-vecka').innerText = sVecka.toLocaleString('sv-SE');
-            document.getElementById('steg-manad').innerText = sManad.toLocaleString('sv-SE'); 
-            document.getElementById('steg-ar').innerText = sAr.toLocaleString('sv-SE'); 
-            document.getElementById('steg-total').innerText = sTotal.toLocaleString('sv-SE');
+            document.getElementById('steg-idag').innerText = sIdag.toLocaleString('sv-SE'); document.getElementById('steg-vecka').innerText = sVecka.toLocaleString('sv-SE');
+            document.getElementById('steg-manad').innerText = sManad.toLocaleString('sv-SE'); document.getElementById('steg-ar').innerText = sAr.toLocaleString('sv-SE'); document.getElementById('steg-total').innerText = sTotal.toLocaleString('sv-SE');
         }
 
-        // --- BACKUP & RESTORE ---
+        // --- SYNK/EXPORT ---
         function importeraMasterDataDirekt() {
-            const input = document.createElement('input'); 
-            input.type = 'file'; 
-            input.accept = '.json';
+            const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
             input.onchange = function(e) {
-                const file = e.target.files[0]; 
-                const reader = new FileReader();
+                const file = e.target.files[0]; const reader = new FileReader();
                 reader.onload = function(evt) {
                     try {
-                        const parsed = JSON.parse(evt.target.result); 
-                        const logs = parsed.logs || parsed;
-                        
-                        // Handle Array or Object structure from JSON
+                        const parsed = JSON.parse(evt.target.result); const logs = parsed.logs || parsed;
                         const logArray = Array.isArray(logs) ? logs : Object.values(logs);
-                        
-                        logArray.forEach(log => { 
-                            saveToIDB(log); 
-                            database.ref(`users/${currentUser.uid}/logs/${log.id}`).set(log); 
-                        });
+                        logArray.forEach(log => { saveToIDB(log); database.ref(`users/${currentUser.uid}/logs/${log.id}`).set(log); });
                         alert("MOLNET OCH LOCAL CACHE SYNKAT MED JSON BACKUP! ✓");
-                    } catch(err) { 
-                        alert("Fel vid tolkning. Kontrollera JSON-strukturen."); 
-                    }
-                }; 
-                reader.readAsText(file);
-            }; 
-            input.click();
+                    } catch(err) { alert("Fel vid tolkning. Kontrollera JSON-strukturen."); }
+                }; reader.readAsText(file);
+            }; input.click();
         }
 
         function exporteraMasterDataLive() {
-            const output = {
-                profile: { persona: "BEAR", themeColor: "#022c22" },
-                logs: logsData
-            };
+            const output = { profile: { persona: "BEAR", themeColor: "#022c22" }, logs: logsData };
             const blob = new Blob([JSON.stringify(output, null, 2)], { type: "application/json" });
-            const a = document.createElement('a'); 
-            a.href = URL.createObjectURL(blob); 
-            a.download = `primal_path_gemini_backup_${new Date().toISOString().split('T')[0]}.json`; 
-            a.click();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `primal_path_gemini_backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
         }
 
         function rensaIndexedDB() {
-            if(confirm("Vill du rensa den lokala cachen? Detta tvingar appen att hämta allt från molnet på nytt nästa gång du laddar om. (Använd endast vid tekniska fel)")) {
-                if(db) { 
-                    const req = indexedDB.deleteDatabase("PrimalPathDB"); 
-                    req.onsuccess = () => { 
-                        alert("Lokal Cache tömd. Templet startar om."); 
-                        location.reload(); 
-                    }; 
-                }
+            if(confirm("Vill du rensa den lokala cachen? Detta tvingar appen att hämta allt från molnet på nytt nästa gång du laddar om.")) {
+                if(db) { const req = indexedDB.deleteDatabase("PrimalPathDB"); req.onsuccess = () => { alert("Lokal Cache tömd. Templet startar om."); location.reload(); }; }
             }
         }
 
-        // --- VÄKTARNA CHAT (GEMINI API) ---
+        // --- VÄKTARNA ---
         async function skickaChattMeddelande() {
-            const input = document.getElementById('chat-input'); 
-            const msg = input.value.trim(); 
-            if(!msg) return;
-            
+            const input = document.getElementById('chat-input'); const msg = input.value.trim(); if(!msg) return;
             const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML += `<div class="temple-bg temple-border p-3 rounded-xl text-stone-200 text-right temple-shadow">
-                                    <span class="text-[9px] text-emerald-400 block uppercase font-bold mb-1">Jonas</span>${msg}
-                                  </div>`;
-            input.value = ""; 
-            chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.innerHTML += `<div class="temple-bg temple-border p-3 rounded-xl text-stone-200 text-right temple-shadow"><span class="text-[9px] text-emerald-400 block uppercase font-bold mb-1">Jonas</span>${msg}</div>`;
+            input.value = ""; chatBox.scrollTop = chatBox.scrollHeight;
 
             const loaderId = 'vaktare-load-' + Date.now();
-            chatBox.innerHTML += `<div id="${loaderId}" class="temple-input-bg temple-border p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500 font-mono text-xs animate-pulse">
-                                    <span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>Väktaren andas in...
-                                  </div>`;
+            chatBox.innerHTML += `<div id="${loaderId}" class="temple-input-bg temple-border p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500 font-mono text-xs animate-pulse"><span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>Väktaren andas in...</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Notice: Requires API Key in production, placed securely. Uses Firebase as a proxy or direct fetch if key is embedded.
-                // Assuming standard Gemini REST API logic from the user's previous structure.
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${firebaseConfig.apiKey}`, {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        contents: [{ parts: [{ text: msg }] }], 
-                        systemInstruction: { parts: [{ text: "Du är Väktaren (Björnen), en rå, arkaisk och direkt träningscoach för Jonas. Jonas har en titanskruv i vänster lårhals, vilket kräver respekt för biomekaniken. Använd korta, kraftfulla svar." }] } 
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: msg }] }], systemInstruction: { parts: [{ text: "Du är Väktaren (Björnen), en rå träningscoach för Jonas." }] } })
                 });
-                const data = await response.json(); 
-                document.getElementById(loaderId).classList.remove('animate-pulse');
-                
-                let replyText = data.candidates && data.candidates[0] ? data.candidates[0].content.parts[0].text : "Väktaren är tyst. Elden falnar tillfälligt.";
-                
+                const data = await response.json(); document.getElementById(loaderId).classList.remove('animate-pulse');
+                let replyText = data.candidates && data.candidates[0] ? data.candidates[0].content.parts[0].text : "Väktaren är tyst.";
                 document.getElementById(loaderId).innerHTML = `<span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>${replyText}`;
-            } catch (err) { 
-                document.getElementById(loaderId).innerText = "Anropet blockerades av kryptans murar."; 
-            }
+            } catch (err) { document.getElementById(loaderId).innerText = "Anropet blockerades av kryptans murar."; }
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
@@ -959,31 +825,23 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500'));
-            
             document.getElementById(`view-${tabId}`).classList.add('active');
-            
-            if(btnElem) {
-                btnElem.classList.remove('text-stone-500'); 
-                btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); 
-            }
+            if(btnElem) { btnElem.classList.remove('text-stone-500'); btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); }
             lucide.createIcons();
-            
             if(tabId === 'rit') window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- GLOBAL EXPORTS ---
-        window.hanteraAuth = hanteraAuth; window.loggaUt = loggaUt; window.switchTab = switchTab; 
-        window.valjNyOvning = valjNyOvning; window.läggTillSet = läggTillSet; window.taBortSet = taBortSet; 
-        window.uppdateraSetData = uppdateraSetData; window.sparaDagensRit = sparaDagensRit; 
-        window.autoSparaData = autoSparaData; window.importeraMasterDataDirekt = importeraMasterDataDirekt; 
+        window.hanteraAuth = hanteraAuth; window.loggaUt = loggaUt; window.switchTab = switchTab; window.valjNyOvning = valjNyOvning; 
+        window.läggTillSet = läggTillSet; window.taBortSet = taBortSet; window.uppdateraSetData = uppdateraSetData; 
+        window.sparaDagensRit = sparaDagensRit; window.autoSparaData = autoSparaData; window.importeraMasterDataDirekt = importeraMasterDataDirekt; 
         window.redigeraPass = redigeraPass; window.raderaPass = raderaPass; window.nollstallTillIdag = nollstallTillIdag; 
         window.toggleCollapseCard = toggleCollapseCard; window.valjSidaForExercise = valjSidaForExercise;
         window.skickaChattMeddelande = skickaChattMeddelande; window.exporteraMasterDataLive = exporteraMasterDataLive;
         window.laggTillEnskildAnteckning = laggTillEnskildAnteckning; window.taBortEnskildAnteckning = taBortEnskildAnteckning;
         window.laddaUppBild = laddaUppBild; window.taBortBild = taBortBild; window.rensaIndexedDB = rensaIndexedDB;
-        window.rensaSkarmForNyDag = rensaSkarmForNyDag;
+        window.rensaSkarmForNyDag = rensaSkarmForNyDag; window.byggKalender = byggKalender; window.andraManad = andraManad;
+        window.valjKalenderDag = valjKalenderDag; window.promptCloudinaryLogin = promptCloudinaryLogin; window.handleCloudinaryRedirect = handleCloudinaryRedirect;
 
-        // Initialize icons on load
         lucide.createIcons();
     </script>
 </body>
