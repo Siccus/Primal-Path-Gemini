@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#021a14">
-    <title>Primal Path AI | Gen 1.5.6 Live</title>
+    <title>Primal Path AI | Gen 1.6.3 Cloudinary Native</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -21,8 +21,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: floatUp 0.25s ease-out forwards; }
         @keyframes floatUp { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
-        #map { height: 340px; width: 100%; background: #021a14 !important; }
-        .leaflet-tile { filter: brightness(0.35) invert(1) contrast(1.8) saturate(0.1) hue-rotate(120deg); }
+        #map-placeholder { height: 340px; width: 100%; background: #01130e; }
         .chat-container { height: 320px; }
     </style>
 </head>
@@ -55,9 +54,14 @@
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">NATIVE ACTIVE • GEN 1.5.6</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">CLOUDINARY NATIVE • GEN 1.6.3</p>
             </div>
-            <button onclick="window.loggaUt()" class="px-3 py-1.5 bg-[#03241b] border border-[#0d4737] rounded-xl text-stone-400 font-mono text-[10px] uppercase hover:text-red-400 transition-colors">Ut</button>
+            <div class="flex items-center gap-3">
+                <div id="sync-indicator" class="text-emerald-500 transition-all" title="Allt synkat med molnet">
+                    <i data-lucide="cloud-check" class="w-4 h-4"></i>
+                </div>
+                <button onclick="window.loggaUt()" class="px-3 py-1.5 bg-[#03241b] border border-[#0d4737] rounded-xl text-stone-400 font-mono text-[10px] uppercase hover:text-red-400 transition-colors">Ut</button>
+            </div>
         </header>
 
         <div id="edit-date-banner" class="hidden bg-amber-950/80 border border-amber-600 p-3 rounded-xl flex justify-between items-center text-xs font-mono text-amber-300 shadow-xl">
@@ -111,16 +115,28 @@
                     <span class="text-[10px] font-mono text-stone-400 uppercase block">Anteckningar</span>
                     <div class="flex gap-2 items-center">
                         <textarea id="today-notes-input" placeholder="Skriv din reflektion..." rows="1" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';" class="flex-1 bg-[#021611] border border-[#0d4737] rounded-xl px-3 py-2 text-xs text-white focus:outline-none resize-none overflow-hidden min-h-[36px] font-sans"></textarea>
-                        <button onclick="window.laggTillEnskildAnteckning()" class="bg-amber-600 hover:bg-amber-700 text-white rounded-xl h-9 w-9 flex items-center justify-center transition-all shrink-0"><i data-lucide="save" class="w-4 h-4"></i></button>
+                        <button onclick="window.laggTillEnskildAnteckning()" class="bg-amber-600 hover:bg-amber-700 text-white rounded-xl h-9 w-9 flex items-center justify-center transition-all shrink-0 shadow-md"><i data-lucide="save" class="w-4 h-4"></i></button>
                     </div>
                     <div id="active-notes-list" class="space-y-1.5 pt-1"></div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-[#0d4737]/40">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-mono text-stone-400 uppercase">Formbild / Minnen</span>
+                        <label class="bg-[#021611] border border-[#0d4737] hover:border-emerald-500 text-emerald-500 cursor-pointer rounded-xl px-3 py-1.5 flex items-center justify-center transition-all text-xs font-bold font-mono shadow-md">
+                            <i data-lucide="camera" class="w-4 h-4 mr-1.5"></i> Ta/Välj bild
+                            <input type="file" id="image-upload-input" accept="image/*" class="hidden" onchange="window.laddaUppBild(event)">
+                        </label>
+                    </div>
+                    <div id="upload-spinner" class="hidden text-[10px] font-mono text-amber-500 animate-pulse text-right">Laddar upp till Cloudinary...</div>
+                    <div id="active-images-list" class="grid grid-cols-3 gap-2 pt-1"></div>
                 </div>
             </div>
 
             <div class="bg-[#03241b] border border-[#0d4737] p-4 rounded-2xl space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-sm font-black text-white">Prövningar</h3>
-                    <select id="exercise-selector" onchange="window.valjNyOvning()" class="bg-[#b85303] hover:bg-orange-700 text-white font-mono text-xs font-bold py-2 px-3 rounded-xl focus:outline-none cursor-pointer transition-colors">
+                    <select id="exercise-selector" onchange="window.valjNyOvning()" class="bg-[#b85303] hover:bg-orange-700 text-white font-mono text-xs font-bold py-2 px-3 rounded-xl focus:outline-none cursor-pointer transition-colors shadow-md">
                         <option value="">+ Lägg till kraft...</option>
                         <option value="Militärpress">Militärpress</option>
                         <option value="Forecarm Curls">Forecarm Curls</option>
@@ -132,9 +148,9 @@
                 <div id="active-workout-builder" class="space-y-3"></div>
             </div>
 
-            <div class="pt-2">
-                <button onclick="window.sparaDagensRit(true)" class="w-full py-3.5 bg-stone-100 hover:bg-white text-stone-950 rounded-xl font-mono text-xs font-black flex items-center justify-center gap-2 shadow-2xl uppercase tracking-wider transition-all">
-                    <i class="w-4 h-4" data-lucide="check-circle"></i> Säkra Dagens Rit
+            <div class="pt-1">
+                <button onclick="window.rensaSkarmForNyDag()" class="w-full py-3 bg-[#053527] border border-[#0d4737] text-stone-300 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-2 uppercase tracking-wider transition-all hover:bg-[#074734]">
+                    <i class="w-4 h-4" data-lucide="refresh-cw"></i> Rensa Skärmen för Ny Dag
                 </button>
             </div>
         </main>
@@ -160,11 +176,11 @@
             <div class="bg-[#03241b] border border-[#0d4737] p-4 rounded-2xl space-y-2">
                 <div class="flex justify-between items-start">
                     <div>
-                        <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="activity" class="w-4 h-4 text-red-500"></i> Beredskap (ACWR)</h3>
+                        <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="activity" class="w-4 h-4 text-emerald-500"></i> ACWR & Dempster</h3>
                     </div>
-                    <span class="text-xl font-mono font-black text-red-500" id="acwr-display">3.61</span>
+                    <span class="text-xs font-mono font-black text-stone-500 border border-stone-800 bg-[#010f0c] px-2 py-0.5 rounded">FRYST</span>
                 </div>
-                <p class="text-red-300 font-mono text-[10px] uppercase bg-red-950/40 p-2 rounded-lg border border-red-900/30 animate-pulse">⚠️ Hög riskzon! Akut belastning överstiger tålighet markant.</p>
+                <p class="text-stone-400 font-serif text-[10px] italic pt-1">Djupare kalkyleringar appliceras när datastrukturen är mogen.</p>
             </div>
 
             <div class="bg-[#03241b] border border-[#0d4737] p-4 rounded-2xl space-y-3">
@@ -183,7 +199,13 @@
         </main>
 
         <main id="view-explorer" class="tab-content space-y-4">
-            <div id="map" class="rounded-xl border border-[#0d4737] overflow-hidden"></div>
+            <div class="space-y-1"><h2 class="text-xl font-black tracking-tight text-white">Okänt Land</h2><p class="text-xs text-stone-400">Terrängkartläggning.</p></div>
+            <div id="map-placeholder" class="rounded-2xl border border-[#0d4737] flex flex-col items-center justify-center p-6 text-center space-y-2">
+                <div class="p-3 bg-emerald-950/40 rounded-full text-emerald-500 border border-emerald-500/20"><i data-lucide="map" class="w-6 h-6"></i></div>
+                <h3 class="font-mono text-sm font-bold text-white uppercase">Explorer Modul</h3>
+                <p class="text-stone-500 text-xs max-w-xs font-serif italic">"Webbaserad filterfri GPS-grid synkroniseras under Etapp 2."</p>
+                <span class="bg-amber-950 text-amber-500 border border-amber-500/20 rounded px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider">Kommer snart</span>
+            </div>
         </main>
 
         <main id="view-achievements" class="tab-content space-y-4">
@@ -196,7 +218,7 @@
                 <div id="chat-box" class="chat-container overflow-y-auto space-y-3 pr-1 font-mono text-xs">
                     <div class="bg-[#021611] border border-[#0d4737] p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500">
                         <span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>
-                        Kryptan är öppen, Jonas. Jag vakar över din träningsvolym och dina framsteg. Ställ dina frågor när du vill.
+                        Kryptan är öppen. Din data är säkrad. Ställ dina frågor när du är redo.
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -209,28 +231,19 @@
         <main id="view-settings" class="tab-content space-y-4">
             <div class="space-y-1"><h2 class="text-xl font-black tracking-tight text-white">Inställningar</h2><p class="text-xs text-stone-400">Forma din värld.</p></div>
             <div class="bg-[#03241b] border border-[#0d4737] p-4 rounded-2xl space-y-4">
-                <div>
-                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase mb-2 flex items-center gap-1.5"><i data-lucide="palette" class="w-4 h-4 text-emerald-500"></i> Atmosfär</h3>
-                    <div class="grid grid-cols-4 gap-2 h-10">
-                        <div class="bg-emerald-950 border-2 border-emerald-500 rounded-lg cursor-pointer shadow-lg"></div>
-                        <div class="bg-stone-900 rounded-lg opacity-40"></div>
-                        <div class="bg-amber-950 rounded-lg opacity-40"></div>
-                        <div class="bg-indigo-950 rounded-lg opacity-40"></div>
-                    </div>
+                
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase flex items-center gap-1.5"><i data-lucide="image" class="w-4 h-4 text-emerald-500"></i> Bildlagring (Cloudinary)</h3>
+                    <input type="text" id="setting-cloud-name" placeholder="Ditt Cloudinary Name" oninput="localStorage.setItem('cloudinary_name', this.value)" class="w-full bg-[#021611] border border-[#0d4737] rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                    <input type="text" id="setting-cloud-preset" placeholder="Din Upload Preset (Unsigned)" oninput="localStorage.setItem('cloudinary_preset', this.value)" class="w-full bg-[#021611] border border-[#0d4737] rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                    <p class="text-[9px] text-stone-500 font-mono italic leading-tight">Ange egna uppgifter här så laddas bilderna upp till din egen lagring (Zero cost architecture).</p>
                 </div>
-                <div>
-                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase mb-2 flex items-center gap-1.5"><i data-lucide="shield" class="w-4 h-4 text-emerald-500"></i> Välj din Väktare</h3>
-                    <div class="grid grid-cols-2 gap-2 font-mono text-xs">
-                        <div class="bg-[#021611] border-2 border-amber-600 p-3 rounded-xl shadow-md">
-                            <span class="block font-black text-white text-xs">Björnen 🟠</span>
-                            <span class="text-[9px] text-stone-500 uppercase tracking-wide">Råstyrka & Massa</span>
-                        </div>
-                    </div>
-                </div>
+
                 <div class="border-t border-[#0d4737]/60 pt-4 space-y-2">
-                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase mb-2 flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Data & Backup</h3>
-                    <button onclick="window.importeraMasterDataDirekt()" class="w-full py-3 bg-[#021611] border border-amber-600/40 text-amber-400 rounded-xl hover:bg-[#0d4737] transition-colors font-bold font-mono text-xs uppercase shadow-md">Tänd JSON Backup</button>
+                    <h3 class="text-xs font-bold text-stone-300 font-mono uppercase mb-2 flex items-center gap-1.5"><i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Data & Synk</h3>
+                    <button onclick="window.importeraMasterDataDirekt()" class="w-full py-2.5 bg-[#021611] border border-amber-600/40 text-amber-400 rounded-xl hover:bg-[#0d4737] transition-colors font-bold font-mono text-[10px] uppercase shadow-md">Tänd JSON Backup</button>
                     <button onclick="window.exporteraMasterDataLive()" class="w-full py-2.5 bg-[#021611] border border-[#0d4737] text-stone-400 rounded-xl hover:bg-[#0d4737] transition-colors font-bold font-mono text-[10px] uppercase">Ladda ned Hård Backup</button>
+                    <button onclick="window.rensaIndexedDB()" class="w-full py-2.5 bg-red-950/20 text-red-500 border border-red-900/30 rounded-xl font-bold font-mono text-[10px] uppercase mt-2">Rensa Lokal Cache</button>
                 </div>
             </div>
         </main>
@@ -275,22 +288,83 @@
         let logsData = [];
         let activeExercises = [];
         let activeNotesArray = []; 
+        let activeImagesArray = []; 
         
         let aktivtDatum = new Date().toISOString().split('T')[0];
         let autoSyncTimer = null;
         let collapsedCards = {};
 
-        auth.onAuthStateChanged(user => {
-            const authScreen = document.getElementById('auth-screen');
-            if (user) {
-                currentUser = user;
-                authScreen.classList.add('hidden');
-                lyftDataFrånMolnet();
-            } else {
-                currentUser = null;
-                authScreen.classList.remove('hidden');
+        // 1. INDEXED DB (Lokal Cache)
+        let db;
+        const dbRequest = indexedDB.open("PrimalPathDB", 1);
+        dbRequest.onerror = (e) => console.error("IndexedDB error:", e);
+        dbRequest.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains('logs')) {
+                db.createObjectStore('logs', { keyPath: 'id' });
             }
-        });
+        };
+        dbRequest.onsuccess = (e) => {
+            db = e.target.result;
+            auth.onAuthStateChanged(user => {
+                const authScreen = document.getElementById('auth-screen');
+                if (user) {
+                    currentUser = user;
+                    authScreen.classList.add('hidden');
+                    initieraSystem();
+                } else {
+                    currentUser = null;
+                    authScreen.classList.remove('hidden');
+                }
+            });
+        };
+
+        function saveToIDB(logObj) {
+            if(!db) return;
+            const transaction = db.transaction(["logs"], "readwrite");
+            transaction.objectStore("logs").put(logObj);
+        }
+
+        function getAllFromIDB(callback) {
+            if(!db) return callback([]);
+            const request = db.transaction(["logs"], "readonly").objectStore("logs").getAll();
+            request.onsuccess = () => { callback(request.result.sort((a,b) => b.id.localeCompare(a.id))); };
+        }
+
+        function initieraSystem() {
+            if(!currentUser) return;
+            
+            // Fyll i sparade inställningar
+            document.getElementById('setting-cloud-name').value = localStorage.getItem('cloudinary_name') || "";
+            document.getElementById('setting-cloud-preset').value = localStorage.getItem('cloudinary_preset') || "";
+
+            // Läs lokal cache
+            getAllFromIDB((lokalData) => {
+                if(lokalData && lokalData.length > 0) {
+                    logsData = lokalData;
+                    renderJournalboken(); beraknaStegStatistik(); laddaInDatumTillInputs(aktivtDatum, false);
+                }
+            });
+
+            // Live-lyssna på molnet för cross-device synk
+            database.ref(`users/${currentUser.uid}/logs`).on('value', snapshot => {
+                const data = snapshot.val();
+                if(data) {
+                    const molnLogs = Object.values(data);
+                    molnLogs.forEach(log => saveToIDB(log)); // Spegla till disk
+                    logsData = molnLogs.sort((a,b) => b.id.localeCompare(a.id));
+                    
+                    renderJournalboken(); beraknaStegStatistik();
+                    
+                    // Uppdatera skärmen utan att rensa om man inte skrivit något lokalt just nu
+                    const currentInput = document.getElementById('today-notes-input').value;
+                    if(!currentInput) {
+                        laddaInDatumTillInputs(aktivtDatum, false);
+                    }
+                    setSyncState('synced');
+                }
+            });
+        }
 
         function hanteraAuth(typ) {
             const email = document.getElementById('auth-email').value.trim();
@@ -309,54 +383,104 @@
 
         function loggaUt() { auth.signOut().then(() => location.reload()); }
 
-        function lyftDataFrånMolnet() {
-            if(!currentUser) return;
-            database.ref(`users/${currentUser.uid}/logs`).on('value', snapshot => {
-                const data = snapshot.val();
-                logsData = data ? Object.values(data).sort((a,b) => b.id.localeCompare(a.id)) : [];
-                renderJournalboken();
-                beraknaStegStatistik();
-                
-                if(activeExercises.length === 0 && activeNotesArray.length === 0 && !document.getElementById('today-notes-input').value) {
-                    laddaInDatumTillInputs(aktivtDatum, false);
-                }
-            });
-        }
-
         function autoSparaData() {
+            setSyncState('saving');
             if (autoSyncTimer) clearTimeout(autoSyncTimer);
-            autoSyncTimer = setTimeout(() => { sparaDagensRit(false); }, 1200);
+            autoSyncTimer = setTimeout(() => { sparaDagensRit(false); }, 1000);
         }
 
-        // ANKRA OCH SPARA ANTECKNING DIREKT VIA DISKETTEN
+        function setSyncState(state) {
+            const indicator = document.getElementById('sync-indicator');
+            if(state === 'saving') {
+                indicator.className = "text-amber-500 animate-pulse";
+                indicator.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4 animate-spin"></i>`;
+            } else if(state === 'synced') {
+                indicator.className = "text-emerald-500";
+                indicator.innerHTML = `<i data-lucide="cloud-check" class="w-4 h-4"></i>`;
+            }
+            lucide.createIcons();
+        }
+
+        // ================= CLOUDINARY LOGIK =================
+        async function laddaUppBild(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const cloudName = localStorage.getItem('cloudinary_name') || "";
+            const uploadPreset = localStorage.getItem('cloudinary_preset') || "";
+
+            if(!cloudName || !uploadPreset) {
+                alert("Gå till Inställningar och fyll i ditt Cloudinary Name & Preset först!");
+                switchTab('settings', document.querySelector('button[onclick*="switchTab(\'settings\'"]'));
+                return;
+            }
+
+            document.getElementById('upload-spinner').classList.remove('hidden');
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+                    method: 'POST', body: formData
+                });
+                const data = await response.json();
+                
+                if(data.secure_url) {
+                    activeImagesArray.push({ id: Math.random().toString(36).substring(2,7), url: data.secure_url, timestamp: Date.now() });
+                    renderImagesList();
+                    autoSparaData();
+                } else {
+                    alert("Fel vid bilduppladdning. Kontrollera inställningarna.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Uppladdning misslyckades.");
+            } finally {
+                document.getElementById('upload-spinner').classList.add('hidden');
+                event.target.value = ""; 
+            }
+        }
+
+        function renderImagesList() {
+            const container = document.getElementById('active-images-list'); container.innerHTML = "";
+            activeImagesArray.forEach(img => {
+                let div = document.createElement('div'); div.className = "relative rounded-xl overflow-hidden border border-[#0d4737] h-20 bg-black";
+                div.innerHTML = `
+                    <img src="${img.url}" class="object-cover w-full h-full opacity-80 hover:opacity-100 transition-opacity">
+                    <button onclick="window.taBortBild('${img.id}')" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                container.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function taBortBild(imgId) {
+            activeImagesArray = activeImagesArray.filter(i => i.id !== imgId);
+            renderImagesList(); autoSparaData();
+        }
+
+        // ================= ANTECKNINGAR =================
         function laggTillEnskildAnteckning() {
             const input = document.getElementById('today-notes-input');
             const txt = input.value.trim();
             if(!txt) return;
             
-            const timestamp = Date.now();
-            activeNotesArray.push({ id: Math.random().toString(36).substring(2,7), text: txt, timestamp: timestamp });
-            input.value = "";
-            input.style.height = '36px'; 
-            renderNotesList();
-            sparaDagensRit(false);
+            activeNotesArray.push({ id: Math.random().toString(36).substring(2,7), text: txt, timestamp: Date.now() });
+            input.value = ""; input.style.height = '36px'; 
+            renderNotesList(); sparaDagensRit(false);
         }
 
         function taBortEnskildAnteckning(noteId) {
             activeNotesArray = activeNotesArray.filter(n => n.id !== noteId);
-            renderNotesList();
-            autoSparaData();
+            renderNotesList(); autoSparaData();
         }
 
         function renderNotesList() {
-            const container = document.getElementById('active-notes-list');
-            container.innerHTML = "";
+            const container = document.getElementById('active-notes-list'); container.innerHTML = "";
             activeNotesArray.forEach(n => {
                 const noteTime = n.timestamp ? new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : '08:21';
-                let d = document.createElement('div');
-                d.className = "flex justify-between items-center bg-[#021611] p-2 rounded-xl border border-[#0d4737]/40 text-xs text-stone-300 font-mono";
-                d.innerHTML = `<span><span class="text-stone-500 mr-1.5">${noteTime}</span>${n.text}</span>
-                               <button onclick="window.taBortEnskildAnteckning('${n.id}')" class="text-stone-600 hover:text-red-400 px-1"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                let d = document.createElement('div'); d.className = "flex justify-between items-center bg-[#021611] p-2 rounded-xl border border-[#0d4737]/40 text-xs text-stone-300 font-mono";
+                d.innerHTML = `<span><span class="text-stone-500 mr-1.5">${noteTime}</span>${n.text}</span><button onclick="window.taBortEnskildAnteckning('${n.id}')" class="text-stone-600 hover:text-red-400 px-1"><i data-lucide="x" class="w-3 h-3"></i></button>`;
                 container.appendChild(d);
             });
             lucide.createIcons();
@@ -370,6 +494,7 @@
                 steps: parseInt(document.getElementById('today-steps').value) || 0,
                 exercises: activeExercises,
                 notes: activeNotesArray, 
+                images: activeImagesArray,
                 subjectiveFeel: {
                     energyLevel: parseInt(document.getElementById('slider-livskraft').value),
                     sleepQuality: parseInt(document.getElementById('slider-drommar').value),
@@ -377,27 +502,32 @@
                     mentalState: "", freeText: ""
                 }
             };
+            
+            saveToIDB(nyLogg); // 1. Offline direkt
+
+            // 2. Synka med molnet bakgrunds
             database.ref(`users/${currentUser.uid}/logs/${aktivtDatum}`).set(nyLogg).then(() => {
-                raknaOmVolym();
-                if (visaAlert) {
-                    alert(`Rit för ${aktivtDatum} sparad permanent! ✓`);
-                    if(aktivtDatum === new Date().toISOString().split('T')[0]) nollstallTillIdag();
-                }
+                raknaOmVolym(); setSyncState('synced');
+                if (visaAlert) { alert(`Rit sparad och synkad! ✓`); if(aktivtDatum === new Date().toISOString().split('T')[0]) nollstallTillIdag(); }
             });
         }
 
+        function rensaSkarmForNyDag() {
+            if(confirm("Vill du rensa skärmen? (Din data är redan säker i molnet/minnet)")) {
+                nollstallTillIdag();
+            }
+        }
+
         function redigeraPass(dateId) {
-            aktivtDatum = dateId;
-            laddaInDatumTillInputs(dateId, true);
-            document.getElementById('edit-date-banner').classList.remove('hidden');
-            document.getElementById('edit-date-display').innerText = dateId;
-            switchTab('rit', document.querySelector('button[onclick*="switchTab(\'rit\'"]'));
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            aktivtDatum = dateId; laddaInDatumTillInputs(dateId, true);
+            document.getElementById('edit-date-banner').classList.remove('hidden'); document.getElementById('edit-date-display').innerText = dateId;
+            switchTab('rit', document.querySelector('button[onclick*="switchTab(\'rit\'"]')); window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function raderaPass(dateId) {
             if (!currentUser || !confirm(`Radera hela riten för ${dateId}?`)) return;
             database.ref(`users/${currentUser.uid}/logs/${dateId}`).remove().then(() => {
+                if(db) { db.transaction(["logs"], "readwrite").objectStore("logs").delete(dateId); }
                 if (aktivtDatum === dateId) nollstallTillIdag();
             });
         }
@@ -413,204 +543,89 @@
             if (pass) {
                 document.getElementById('today-steps').value = pass.steps || "";
                 activeNotesArray = Array.isArray(pass.notes) ? pass.notes : [];
+                activeImagesArray = Array.isArray(pass.images) ? pass.images : [];
                 document.getElementById('slider-livskraft').value = pass.subjectiveFeel?.energyLevel || 8;
                 document.getElementById('slider-drommar').value = pass.subjectiveFeel?.sleepQuality || 8;
                 document.getElementById('slider-veder').value = pass.subjectiveFeel?.mentalFocus || 9;
                 activeExercises = pass.exercises || [];
             } else if (!tvingaLaddning) {
-                document.getElementById('today-steps').value = "";
-                activeNotesArray = []; activeExercises = [];
-                document.getElementById('slider-livskraft').value = 8;
-                document.getElementById('slider-drommar').value = 8;
-                document.getElementById('slider-veder').value = 9;
+                document.getElementById('today-steps').value = ""; document.getElementById('today-notes-input').value = "";
+                activeNotesArray = []; activeExercises = []; activeImagesArray = [];
+                document.getElementById('slider-livskraft').value = 8; document.getElementById('slider-drommar').value = 8; document.getElementById('slider-veder').value = 9;
             }
             document.getElementById('val-livskraft').innerText = document.getElementById('slider-livskraft').value;
             document.getElementById('val-drommar').innerText = document.getElementById('slider-drommar').value;
             document.getElementById('val-veder').innerText = document.getElementById('slider-veder').value;
-            renderNotesList();
-            renderActiveWorkoutBuilder();
-            raknaOmVolym();
+            renderNotesList(); renderImagesList(); renderActiveWorkoutBuilder(); raknaOmVolym();
         }
 
-        function toggleCollapseCard(dateId) {
-            collapsedCards[dateId] = !collapsedCards[dateId];
-            renderJournalboken();
-        }
+        function toggleCollapseCard(dateId) { collapsedCards[dateId] = !collapsedCards[dateId]; renderJournalboken(); }
 
-        function valjSidaForExercise(exId, valdSida) {
-            const ex = activeExercises.find(e => e.id === exId);
-            if (ex) { ex.side = valdSida; renderActiveWorkoutBuilder(); autoSparaData(); }
-        }
-
-        function valjNyOvning() {
-            const selector = document.getElementById('exercise-selector');
-            if (!selector.value) return;
-            activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: selector.value, metric: "reps", side: "both", sets: [{ reps: 10, weight: 21 }] });
-            selector.value = ""; renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData();
-        }
-
-        function läggTillSet(exId) {
-            const ex = activeExercises.find(e => e.id === exId); if (!ex) return;
-            const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 21 };
-            ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight });
-            renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData();
-        }
-
-        function taBortSet(exId, setIdx) {
-            const ex = activeExercises.find(e => e.id === exId); if (!ex) return;
-            ex.sets.splice(setIdx, 1);
-            if (ex.sets.length === 0) activeExercises = activeExercises.filter(e => e.id !== exId);
-            renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData();
-        }
-
-        function uppdateraSetData(exId, setIdx, fält, värde) {
-            const ex = activeExercises.find(e => e.id === exId);
-            if (ex && ex.sets[setIdx]) ex.sets[setIdx][fält] = parseFloat(värde) || 0;
-            raknaOmVolym(); autoSparaData();
-        }
+        function valjSidaForExercise(exId, valdSida) { const ex = activeExercises.find(e => e.id === exId); if (ex) { ex.side = valdSida; renderActiveWorkoutBuilder(); autoSparaData(); } }
+        function valjNyOvning() { const sel = document.getElementById('exercise-selector'); if (!sel.value) return; activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: sel.value, metric: "reps", side: "both", sets: [{ reps: 10, weight: 21 }] }); sel.value = ""; renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
+        function läggTillSet(exId) { const ex = activeExercises.find(e => e.id === exId); if (!ex) return; const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 21 }; ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight }); renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
+        function taBortSet(exId, setIdx) { const ex = activeExercises.find(e => e.id === exId); if (!ex) return; ex.sets.splice(setIdx, 1); if (ex.sets.length === 0) activeExercises = activeExercises.filter(e => e.id !== exId); renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
+        function uppdateraSetData(exId, setIdx, fält, värde) { const ex = activeExercises.find(e => e.id === exId); if (ex && ex.sets[setIdx]) ex.sets[setIdx][fält] = parseFloat(värde) || 0; raknaOmVolym(); autoSparaData(); }
 
         function renderActiveWorkoutBuilder() {
             const container = document.getElementById('active-workout-builder'); container.innerHTML = "";
             activeExercises.forEach(ex => {
-                const currentSide = ex.side || "both";
-                let card = document.createElement('div'); card.className = "bg-[#021611] border border-[#0d4737] rounded-xl p-3 space-y-2";
-                card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-[#0d4737]/60 pb-1">
-                        <span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide"><i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}</span>
-                        <div class="flex items-center gap-1 font-mono text-[9px] font-bold">
-                            <button onclick="window.valjSidaForExercise('${ex.id}', 'left')" class="px-2 py-0.5 rounded ${currentSide === 'left' ? 'bg-amber-600 text-white' : 'bg-[#03241b] text-stone-500'}">V</button>
-                            <button onclick="window.valjSidaForExercise('${ex.id}', 'both')" class="px-2 py-0.5 rounded ${currentSide === 'both' ? 'bg-emerald-700 text-white' : 'bg-[#03241b] text-stone-500'}">B</button>
-                            <button onclick="window.valjSidaForExercise('${ex.id}', 'right')" class="px-2 py-0.5 rounded ${currentSide === 'right' ? 'bg-amber-600 text-white' : 'bg-[#03241b] text-stone-500'}">H</button>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5">
-                        ${ex.sets.map((set, idx) => `
-                            <div class="flex items-center justify-between bg-[#03241b]/40 p-2 rounded-lg border border-[#0d4737]/30 gap-2 font-mono text-xs">
-                                <span class="text-[10px] text-emerald-700 font-bold">#${idx + 1}</span>
-                                <div class="flex items-center gap-1.5 flex-1 justify-end">
-                                    <input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 bg-[#021611] border border-[#0d4737] rounded text-center py-0.5 text-white focus:outline-none">
-                                    <span class="text-[9px] text-stone-500">reps</span>
-                                    <input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 bg-[#021611] border border-[#0d4737] rounded text-center py-0.5 text-white focus:outline-none">
-                                    <span class="text-[9px] text-stone-500">kg</span>
-                                    <button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button>
-                                </div>
-                            </div>`).join('')}
-                    </div>
-                    <button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 bg-[#03241b] text-stone-400 text-[10px] font-mono rounded-lg border border-[#0d4737] mt-1.5">+ SET</button>`;
+                const currentSide = ex.side || "both"; let card = document.createElement('div'); card.className = "bg-[#021611] border border-[#0d4737] rounded-xl p-3 space-y-2";
+                card.innerHTML = `<div class="flex justify-between items-center border-b border-[#0d4737]/60 pb-1"><span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide"><i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}</span><div class="flex items-center gap-1 font-mono text-[9px] font-bold"><button onclick="window.valjSidaForExercise('${ex.id}', 'left')" class="px-2 py-0.5 rounded ${currentSide === 'left' ? 'bg-amber-600 text-white' : 'bg-[#03241b] text-stone-500'}">V</button><button onclick="window.valjSidaForExercise('${ex.id}', 'both')" class="px-2 py-0.5 rounded ${currentSide === 'both' ? 'bg-emerald-700 text-white' : 'bg-[#03241b] text-stone-500'}">B</button><button onclick="window.valjSidaForExercise('${ex.id}', 'right')" class="px-2 py-0.5 rounded ${currentSide === 'right' ? 'bg-amber-600 text-white' : 'bg-[#03241b] text-stone-500'}">H</button></div></div><div class="space-y-1.5">${ex.sets.map((set, idx) => `<div class="flex items-center justify-between bg-[#03241b]/40 p-2 rounded-lg border border-[#0d4737]/30 gap-2 font-mono text-xs"><span class="text-[10px] text-emerald-700 font-bold">#${idx + 1}</span><div class="flex items-center gap-1.5 flex-1 justify-end"><input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 bg-[#021611] border border-[#0d4737] rounded text-center py-0.5 text-white focus:outline-none"><span class="text-[9px] text-stone-500">reps</span><input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 bg-[#021611] border border-[#0d4737] rounded text-center py-0.5 text-white focus:outline-none"><span class="text-[9px] text-stone-500">kg</span><button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button></div></div>`).join('')}</div><button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 bg-[#03241b] text-stone-400 text-[10px] font-mono rounded-lg border border-[#0d4737] mt-1.5">+ SET</button>`;
                 container.appendChild(card);
             });
             lucide.createIcons();
         }
 
-        function raknaOmVolym() {
-            let total = 0; activeExercises.forEach(ex => ex.sets.forEach(s => total += (s.reps*s.weight)));
-            document.getElementById('live-vol-display').innerText = `${total.toLocaleString('sv-SE')} kg`;
-        }
+        function raknaOmVolym() { let total = 0; activeExercises.forEach(ex => ex.sets.forEach(s => total += (s.reps*s.weight))); document.getElementById('live-vol-display').innerText = `${total.toLocaleString('sv-SE')} kg`; }
 
         function renderJournalboken() {
             const anchor = document.getElementById('historical-logs-anchor'); if (!anchor) return;
             if (logsData.length === 0) { anchor.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Kryptan är tom.</p>"; return; }
             anchor.innerHTML = "";
-            
-            const manader = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEC"];
-            const dagarVecka = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
+            const manader = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEC"]; const dagarVecka = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
 
             logsData.forEach(log => {
                 let passVolym = 0, rows = "";
-                
                 if (log.exercises) {
                     log.exercises.forEach(ex => {
-                        let labels = []; let sideCode = "B";
-                        if(ex.side === "left") sideCode = "V"; if(ex.side === "right") sideCode = "H";
-                        
+                        let labels = []; let sideCode = "B"; if(ex.side === "left") sideCode = "V"; if(ex.side === "right") sideCode = "H";
                         ex.sets?.forEach(s => { passVolym += (s.reps*s.weight); labels.push(`${s.reps} reps x ${s.weight}kg`); });
-                        
                         const sideBadge = sideCode !== 'B' ? `<span class="text-amber-500 border border-amber-500/20 px-1 rounded bg-amber-950/10 text-[9px] font-bold ml-1.5">${sideCode}</span>` : '';
-                        rows += `
-                        <div class="py-2.5 border-b border-[#0d4737]/20 last:border-0 font-mono text-xs">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-white font-black uppercase flex items-center">${ex.name} ${sideBadge}</span>
-                                <span class="text-stone-600 text-[10px]">09:05</span>
-                            </div>
-                            <div class="flex flex-wrap gap-1.5">${labels.map(l => `<span class="bg-[#021611] text-stone-400 px-2 py-1 rounded border border-[#0d4737]/40 text-[11px]">${l}</span>`).join('')}</div>
-                        </div>`;
+                        rows += `<div class="py-2.5 border-b border-[#0d4737]/20 last:border-0 font-mono text-xs"><div class="flex justify-between items-center mb-1"><span class="text-white font-black uppercase flex items-center">${ex.name} ${sideBadge}</span></div><div class="flex flex-wrap gap-1.5">${labels.map(l => `<span class="bg-[#021611] text-stone-400 px-2 py-1 rounded border border-[#0d4737]/40 text-[11px]">${l}</span>`).join('')}</div></div>`;
                     });
                 }
                 
-                let isCollapsed = collapsedCards[log.id] === true;
-                let chevronIkon = isCollapsed ? "chevron-down" : "chevron-up";
-                
-                const parts = log.id.split('-');
-                const dagNummer = parts[2] || "01"; const manadStr = manader[parseInt(parts[1]) - 1] || "MAJ";
-                const veckodag = dagarVecka[new Date(log.id).getDay()] || "Måndag";
+                let isCollapsed = collapsedCards[log.id] === true; let chevronIkon = isCollapsed ? "chevron-down" : "chevron-up";
+                const parts = log.id.split('-'); const dagNummer = parts[2] || "01"; const manadStr = manader[parseInt(parts[1]) - 1] || "MAJ"; const veckodag = dagarVecka[new Date(log.id).getDay()] || "Måndag";
 
                 let notesHtml = "";
-                if(Array.isArray(log.notes)) {
-                    log.notes.forEach(n => {
-                        let timeLabel = "08:21";
-                        if(n.timestamp) {
-                            timeLabel = new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'});
-                        }
-                        notesHtml += `<div class="text-xs text-stone-300 font-sans leading-relaxed mb-2 last:mb-0"><span class="text-stone-500 font-mono text-[10px] mr-2">${timeLabel}</span>${n.text}</div>`;
-                    });
+                if(Array.isArray(log.notes)) { log.notes.forEach(n => { let timeLabel = "08:21"; if(n.timestamp) timeLabel = new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}); notesHtml += `<div class="text-xs text-stone-300 font-sans leading-relaxed mb-2 last:mb-0"><span class="text-stone-500 font-mono text-[10px] mr-2">${timeLabel}</span>${n.text}</div>`; }); }
+                
+                let imagesHtml = "";
+                if(Array.isArray(log.images) && log.images.length > 0) {
+                    imagesHtml = `<div class="grid grid-cols-3 gap-2 mt-2">${log.images.map(img => `<img src="${img.url}" class="rounded-lg border border-[#0d4737] object-cover h-16 w-full opacity-80 hover:opacity-100">`).join('')}</div>`;
                 }
 
                 let div = document.createElement('div'); div.className = "bg-[#03241b] border border-[#0d4737] rounded-2xl shadow-xl overflow-hidden";
                 div.innerHTML = `
                     <div class="p-4 flex justify-between items-center cursor-pointer hover:bg-[#053527]/20 transition-colors" onclick="window.toggleCollapseCard('${log.id}')">
                         <div class="flex items-center gap-3.5">
-                            <div class="bg-[#021611] border border-[#0d4737] rounded-xl px-2.5 py-1 text-center font-mono w-14">
-                                <span class="text-[9px] text-stone-500 uppercase block font-bold tracking-wider">${manadStr}</span>
-                                <span class="text-lg font-black text-white leading-none block mt-0.5">${dagNummer}</span>
-                            </div>
-                            <div>
-                                <span class="text-sm font-black text-white block">${veckodag}</span>
-                                <span class="text-[9px] font-mono text-stone-400 uppercase tracking-wide flex items-center gap-1.5 mt-0.5">
-                                    👣 ${log.steps || 0} • 💬 ${log.subjectiveFeel?.energyLevel || 8}/10 • ⚡ ${passVolym.toLocaleString('sv-SE')} kg
-                                </span>
-                            </div>
+                            <div class="bg-[#021611] border border-[#0d4737] rounded-xl px-2.5 py-1 text-center font-mono w-14"><span class="text-[9px] text-stone-500 uppercase block font-bold tracking-wider">${manadStr}</span><span class="text-lg font-black text-white leading-none block mt-0.5">${dagNummer}</span></div>
+                            <div><span class="text-sm font-black text-white block">${veckodag}</span><span class="text-[9px] font-mono text-stone-400 uppercase tracking-wide flex items-center gap-1.5 mt-0.5">👣 ${log.steps || 0} • 💬 ${log.subjectiveFeel?.energyLevel || 8}/10 • ⚡ ${passVolym.toLocaleString('sv-SE')} kg</span></div>
                         </div>
-                        <div class="flex items-center gap-3 font-mono text-right" onclick="event.stopPropagation();">
-                            <button onclick="window.redigeraPass('${log.id}')" class="text-stone-400 hover:text-amber-500 transition-colors mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                            <i data-lucide="${chevronIkon}" class="w-5 h-5 text-emerald-500"></i>
-                        </div>
+                        <div class="flex items-center gap-3 font-mono text-right" onclick="event.stopPropagation();"><button onclick="window.redigeraPass('${log.id}')" class="text-stone-400 hover:text-amber-500 transition-colors mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button><i data-lucide="${chevronIkon}" class="w-5 h-5 text-emerald-500"></i></div>
                     </div>
-                    
                     <div class="${isCollapsed ? 'hidden' : 'p-4 bg-[#021611]/50 border-t border-[#0d4737]/40 space-y-4'}">
                         <div class="grid grid-cols-2 gap-2 font-mono text-xs">
-                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl">
-                                <span class="text-[9px] text-stone-500 uppercase block tracking-wider">🏋️ Gymvolym</span>
-                                <span class="text-sm font-black text-emerald-500 block mt-0.5">${passVolym.toLocaleString('sv-SE')} <span class="text-[10px] font-normal text-stone-500">kg</span></span>
-                            </div>
-                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl">
-                                <span class="text-[9px] text-stone-500 uppercase block tracking-wider">👣 Vandringslast</span>
-                                <span class="text-sm font-black text-amber-500 block mt-0.5">${((log.steps || 0) * 60 / 1000).toFixed(1)} <span class="text-[10px] font-normal text-stone-500">ton</span></span>
-                            </div>
-                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl">
-                                <span class="text-[9px] text-stone-500 uppercase block tracking-wider">🌙 Sömn</span>
-                                <span class="text-sm font-black text-indigo-400 block mt-0.5">${log.subjectiveFeel?.sleepQuality || 8}/10</span>
-                            </div>
-                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl">
-                                <span class="text-[9px] text-stone-500 uppercase block tracking-wider">🧠 Inre Väder</span>
-                                <span class="text-sm font-black text-emerald-400 block mt-0.5">${log.subjectiveFeel?.mentalFocus || 9}/10</span>
-                            </div>
+                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🏋️ Gymvolym</span><span class="text-sm font-black text-emerald-500 block mt-0.5">${passVolym.toLocaleString('sv-SE')} <span class="text-[10px] font-normal text-stone-500">kg</span></span></div>
+                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">👣 Vandringslast</span><span class="text-sm font-black text-amber-500 block mt-0.5">${((log.steps || 0) * 60 / 1000).toFixed(1)} <span class="text-[10px] font-normal text-stone-500">ton</span></span></div>
+                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🌙 Sömn</span><span class="text-sm font-black text-indigo-400 block mt-0.5">${log.subjectiveFeel?.sleepQuality || 8}/10</span></div>
+                            <div class="bg-[#021611] border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🧠 Inre Väder</span><span class="text-sm font-black text-emerald-400 block mt-0.5">${log.subjectiveFeel?.mentalFocus || 9}/10</span></div>
                         </div>
-
-                        ${notesHtml ? `
-                        <div class="space-y-1.5">
-                            <span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">ANTECKNINGAR</span>
-                            <div class="bg-[#021611] border border-[#0d4737]/40 p-3 rounded-xl">${notesHtml}</div>
-                        </div>` : ''}
-
-                        ${rows ? `
-                        <div class="space-y-1.5">
-                            <span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">TRÄNING</span>
-                            <div class="bg-[#021611] border border-[#0d4737]/40 p-3 rounded-xl">${rows}</div>
-                        </div>` : ''}
-                        
-                        <div class="flex justify-end pt-1 font-mono text-[9px]" onclick="event.stopPropagation();">
-                            <button onclick="window.raderaPass('${log.id}')" class="px-2.5 py-1 bg-red-950/20 hover:bg-red-950 text-red-400 rounded border border-red-900/20 font-bold uppercase transition-all">Radera Riten</button>
-                        </div>
+                        ${notesHtml || imagesHtml ? `<div class="space-y-1.5"><span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">ANTECKNINGAR & BILDER</span><div class="bg-[#021611] border border-[#0d4737]/40 p-3 rounded-xl">${notesHtml}${imagesHtml}</div></div>` : ''}
+                        ${rows ? `<div class="space-y-1.5"><span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">TRÄNING</span><div class="bg-[#021611] border border-[#0d4737]/40 p-3 rounded-xl">${rows}</div></div>` : ''}
+                        <div class="flex justify-end pt-1 font-mono text-[9px]" onclick="event.stopPropagation();"><button onclick="window.raderaPass('${log.id}')" class="px-2.5 py-1 bg-red-950/20 hover:bg-red-950 text-red-400 rounded border border-red-900/20 font-bold uppercase transition-all">Radera Riten</button></div>
                     </div>`;
                 anchor.appendChild(div);
             });
@@ -630,17 +645,11 @@
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${firebaseConfig.apiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: msg }] }],
-                        systemInstruction: { parts: [{ text: "Du är Väktaren (Björnen), en rå, arkaisk och vis träningscoach för Jonas. Prata svenska. Fokusera på råstyrka, återhämtning, biomassa och ta hänsyn till hans begränsade ROM på grund av titanskruven i vänster lårhals. Var direkt, ärlig och använd ett kraftfullt, opolerat men djupt uppmuntrande språk." }] }
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: msg }] }], systemInstruction: { parts: [{ text: "Du är Väktaren (Björnen), en rå träningscoach för Jonas." }] } })
                 });
-                const data = await response.json();
-                document.getElementById(loaderId).classList.remove('animate-pulse');
+                const data = await response.json(); document.getElementById(loaderId).classList.remove('animate-pulse');
                 document.getElementById(loaderId).innerHTML = `<span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>${data.candidates[0].content.parts[0].text}`;
-            } catch (err) {
-                document.getElementById(loaderId).innerText = "Anropet blockerades. Kontrollera din Gemini API Key.";
-            }
+            } catch (err) { document.getElementById(loaderId).innerText = "Anropet blockerades."; }
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
@@ -650,15 +659,12 @@
                 const file = e.target.files[0]; const reader = new FileReader();
                 reader.onload = function(evt) {
                     try {
-                        const parsed = JSON.parse(evt.target.result);
-                        const logs = parsed.logs || parsed;
-                        Object.values(logs).forEach(log => { database.ref(`users/${currentUser.uid}/logs/${log.id}`).set(log); });
-                        alert("MOLNET FILTRERAT OCH ATOMISKT SYNKAT! ✓");
+                        const parsed = JSON.parse(evt.target.result); const logs = parsed.logs || parsed;
+                        Object.values(logs).forEach(log => { saveToIDB(log); database.ref(`users/${currentUser.uid}/logs/${log.id}`).set(log); });
+                        alert("MOLNET OCH LOCAL CACHE SYNKAT! ✓");
                     } catch(err) { alert("Fel vid tolkning."); }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
+                }; reader.readAsText(file);
+            }; input.click();
         }
 
         function exporteraMasterDataLive() {
@@ -666,19 +672,21 @@
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `primal_path_backup_${new Date().toISOString().split('T')[0]}.json`; a.click();
         }
 
+        function rensaIndexedDB() {
+            if(confirm("Vill du rensa den lokala cachen? Detta tvingar appen att hämta allt från molnet på nytt nästa gång du laddar om.")) {
+                if(db) { const req = indexedDB.deleteDatabase("PrimalPathDB"); req.onsuccess = () => { alert("Lokal Cache tömd. Ladda om appen."); location.reload(); }; }
+            }
+        }
+
         function beraknaStegStatistik() {
-            let sIdag = 0, sVecka = 0, sManad = 0, sAr = 0, sTotal = 0;
-            const idagStr = new Date().toISOString().split('T')[0];
+            let sIdag = 0, sVecka = 0, sManad = 0, sAr = 0, sTotal = 0; const idagStr = new Date().toISOString().split('T')[0];
             logsData.forEach(log => {
                 const s = parseInt(log.steps) || 0; sTotal += s; if (log.id === idagStr) sIdag = s;
                 const diff = Math.ceil(Math.abs(new Date() - new Date(log.id)) / (1000 * 60 * 60 * 24));
                 if (diff <= 7) sVecka += s; if (diff <= 30) sManad += s; if (diff <= 365) sAr += s;
             });
-            document.getElementById('steg-idag').innerText = sIdag.toLocaleString('sv-SE');
-            document.getElementById('steg-vecka').innerText = sVecka.toLocaleString('sv-SE');
-            document.getElementById('steg-manad').innerText = sManad.toLocaleString('sv-SE');
-            document.getElementById('steg-ar').innerText = sAr.toLocaleString('sv-SE');
-            document.getElementById('steg-total').innerText = sTotal.toLocaleString('sv-SE');
+            document.getElementById('steg-idag').innerText = sIdag.toLocaleString('sv-SE'); document.getElementById('steg-vecka').innerText = sVecka.toLocaleString('sv-SE');
+            document.getElementById('steg-manad').innerText = sManad.toLocaleString('sv-SE'); document.getElementById('steg-ar').innerText = sAr.toLocaleString('sv-SE'); document.getElementById('steg-total').innerText = sTotal.toLocaleString('sv-SE');
         }
 
         function switchTab(tabId, btnElem) {
@@ -686,8 +694,7 @@
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500'));
             document.getElementById(`view-${tabId}`).classList.add('active');
-            btnElem.classList.remove('text-stone-500'); btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500');
-            lucide.createIcons();
+            btnElem.classList.remove('text-stone-500'); btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); lucide.createIcons();
         }
 
         window.hanteraAuth = hanteraAuth; window.loggaUt = loggaUt; window.switchTab = switchTab; window.valjNyOvning = valjNyOvning; 
@@ -698,6 +705,8 @@
         window.toggleCollapseCard = toggleCollapseCard; window.valjSidaForExercise = valjSidaForExercise;
         window.skickaChattMeddelande = skickaChattMeddelande; window.exporteraMasterDataLive = exporteraMasterDataLive;
         window.laggTillEnskildAnteckning = laggTillEnskildAnteckning; window.taBortEnskildAnteckning = taBortEnskildAnteckning;
+        window.laddaUppBild = laddaUppBild; window.taBortBild = taBortBild; window.rensaIndexedDB = rensaIndexedDB;
+        window.rensaSkarmForNyDag = rensaSkarmForNyDag;
 
         lucide.createIcons();
     </script>
