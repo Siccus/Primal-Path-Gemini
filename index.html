@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#021a14">
-    <title>Primal Path Gemini | Gen 2.4.0</title>
+    <title>Primal Path Gemini | Gen 3.0.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -28,6 +28,14 @@
         
         /* Kalender */
         .calendar-cell { position: relative; z-index: 10; pointer-events: auto; }
+
+        /* Roadmap Animations */
+        @keyframes pulseOrange {
+            0% { stroke-width: 2px; stroke-opacity: 1; }
+            50% { stroke-width: 4px; stroke-opacity: 0.5; }
+            100% { stroke-width: 2px; stroke-opacity: 1; }
+        }
+        .node-pulse { animation: pulseOrange 2s infinite ease-in-out; }
     </style>
 </head>
 <body class="font-sans antialiased pb-32">
@@ -59,7 +67,7 @@
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">GEN 2.4.0 • PALETTO ENGINE</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">GEN 3.0.0 • PALETTO ENGINE</p>
             </div>
             <div class="flex items-center gap-3">
                 <div id="sync-indicator" class="text-amber-500 transition-all" title="Väntar på synk">
@@ -193,8 +201,7 @@
                 <h2 class="text-xl font-black tracking-tight text-white">Min Fysik</h2>
                 <p class="text-xs text-stone-400">Visuell dokumentation av templet.</p>
             </div>
-            <div id="fysik-gallery-container" class="space-y-6 pt-2">
-                </div>
+            <div id="fysik-gallery-container" class="space-y-6 pt-2"></div>
         </main>
 
         <main id="view-skadande" class="tab-content space-y-4">
@@ -224,13 +231,27 @@
             </div>
         </main>
 
+        <main id="view-roadmap" class="tab-content space-y-4">
+            <div class="space-y-1">
+                <h2 class="text-xl font-black tracking-tight text-white">Kryptans Ritningar</h2>
+                <div class="flex justify-between items-center">
+                    <p class="text-xs text-stone-400">Din väg framåt, nod för nod.</p>
+                    <span id="roadmap-progress-badge" class="text-[10px] font-mono text-emerald-500 bg-emerald-950/40 border border-emerald-900/60 px-2 py-0.5 rounded-md uppercase font-bold">0/36 Klara</span>
+                </div>
+            </div>
+            <div class="temple-bg temple-border p-2 rounded-2xl temple-shadow overflow-x-hidden overflow-y-auto max-h-[580px]">
+                <div id="roadmap-canvas-wrapper" class="relative">
+                    </div>
+            </div>
+        </main>
+
         <main id="view-vaktarna" class="tab-content space-y-4">
             <div class="space-y-1"><h2 class="text-xl font-black tracking-tight text-white">Väktarna</h2><p class="text-xs text-stone-400">Andlig Vägledning. Björnen lyssnar.</p></div>
             <div class="temple-bg temple-border rounded-2xl p-4 space-y-4 flex flex-col temple-shadow">
                 <div id="chat-box" class="chat-container overflow-y-auto space-y-3 pr-1 font-mono text-xs">
                     <div class="temple-input-bg temple-border p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500">
                         <span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>
-                        Kryptan är öppen. Din data är säkrad. Ställ dina frågor när du är redo, Jonas.
+                        Kryptan är öppen. Din data är säkrad. Ställ dina frågor när du är ready, Jonas.
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -267,6 +288,38 @@
             </div>
         </main>
 
+        <div id="roadmap-modal" class="hidden fixed inset-0 bg-black/80 z-[110] flex items-center justify-center px-4 backdrop-blur-sm">
+            <div class="temple-bg temple-border p-5 rounded-2xl w-full max-w-sm space-y-4 temple-shadow font-mono text-xs">
+                <div class="flex justify-between items-start border-b border-[#0d4737]/60 pb-2">
+                    <div>
+                        <h3 id="rm-modal-title" class="text-xs font-black text-white uppercase tracking-wider">Nod Titel</h3>
+                        <p id="rm-modal-phase" class="text-[9px] text-emerald-500 uppercase tracking-widest mt-0.5">FAS X</p>
+                    </div>
+                    <span id="rm-modal-id-badge" class="bg-[#021611] text-stone-400 border border-[#0d4737] px-1.5 py-0.5 rounded text-[9px]">N0</span>
+                </div>
+                <p id="rm-modal-desc" class="text-stone-300 font-sans leading-relaxed text-xs py-1">Beskrivning...</p>
+                <div class="flex items-center justify-between temple-input-bg p-2.5 rounded-xl border border-[#0d4737]/40">
+                    <span class="text-stone-500 text-[9px] uppercase font-bold">Nuvarande läge:</span>
+                    <span id="rm-modal-status-text" class="font-black uppercase tracking-wide">STATUS</span>
+                </div>
+                <div id="rm-modal-actions" class="grid grid-cols-1 gap-1.5 pt-1.5">
+                    <button id="rm-btn-action" class="w-full py-2.5 rounded-xl font-bold font-mono text-xs uppercase tracking-wide transition-all temple-shadow"></button>
+                    <button onclick="document.getElementById('roadmap-modal').classList.add('hidden')" class="w-full py-2 temple-input-bg border border-[#0d4737]/60 text-stone-400 font-mono text-[10px] rounded-xl hover:text-white transition-colors uppercase">Stäng</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="roadmap-confirm-modal" class="hidden fixed inset-0 bg-black/90 z-[120] flex items-center justify-center px-4 backdrop-blur-md">
+            <div class="temple-bg temple-border p-5 rounded-2xl w-full max-w-xs space-y-4 text-center temple-shadow font-mono text-xs">
+                <div class="text-amber-500 flex justify-center"><i data-lucide="alert-triangle" class="w-8 h-8"></i></div>
+                <p id="rm-confirm-text" class="text-stone-200 leading-relaxed px-1">Är du helt säker? Handlingar kan skifta eller låsa om strukturer.</p>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button id="rm-btn-confirm-yes" class="py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-xl transition-all">Bekräfta</button>
+                    <button id="rm-btn-confirm-no" class="py-2.5 temple-input-bg temple-border text-stone-400 font-bold rounded-xl transition-all">Avbryt</button>
+                </div>
+            </div>
+        </div>
+
         <div class="fixed bottom-16 left-4 right-4 max-w-[calc(100%-2rem)] md:max-w-[416px] mx-auto z-40 space-y-1.5 pointer-events-none">
             <div id="volume-indicator" class="p-2.5 bg-[#03241b]/90 temple-border text-stone-400 rounded-xl font-mono flex justify-between items-center temple-shadow backdrop-blur-md text-xs">
                 <span class="text-[10px] uppercase font-bold">LIVE-VOLYM (PASS):</span>
@@ -280,6 +333,7 @@
                 <button onclick="window.switchTab('journal', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="calendar"></i><span class="text-[8px] uppercase font-mono">Logg</span></button>
                 <button onclick="window.switchTab('fysik', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="image"></i><span class="text-[8px] uppercase font-mono">Fysik</span></button>
                 <button onclick="window.switchTab('skadande', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="eye"></i><span class="text-[8px] uppercase font-mono">Skåda</span></button>
+                <button onclick="window.switchTab('roadmap', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="map"></i><span class="text-[8px] uppercase font-mono">Karta</span></button>
                 <button onclick="window.switchTab('vaktarna', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="sparkles"></i><span class="text-[8px] uppercase font-mono">Andar</span></button>
                 <button onclick="window.switchTab('settings', this)" class="p-2 rounded-xl text-stone-500 flex flex-col items-center gap-1 flex-1 nav-btn"><i class="w-4.5 h-4.5" data-lucide="settings"></i><span class="text-[8px] uppercase font-mono">Inst</span></button>
             </div>
@@ -307,8 +361,10 @@
         let activeExercises = [];
         let activeNotesArray = []; 
         let activeImagesArray = []; 
-        let pendingImagesQueue = []; // Lokala förhandsgranskningar (Blob/DataURL)
+        let pendingImagesQueue = []; 
         let isSyncingEngineActive = false;
+        
+        let devRoadmap = null; // Master Blueprint state
         
         let aktivtDatum = new Date().toISOString().split('T')[0];
         let autoSyncTimer = null;
@@ -334,6 +390,50 @@
                     currentUser = null; authScreen.classList.remove('hidden');
                 }
             });
+        };
+
+        const initialRoadmapData = {
+            "n1": { id: "n1", title: "Repo & Mappstruktur", phase: 1, status: "pending", dependsOn: null, desc: "Etablera ren lokal filstruktur för assets, js, css och data." },
+            "n2": { id: "n2", title: "Firebase Setup", phase: 1, status: "locked", dependsOn: "n1", desc: "Initiera Auth & Database-moduler och lås ner konfigurationsnycklarna säkert." },
+            "n3": { id: "n3", title: "Roadmap JSON Schema", phase: 1, status: "locked", dependsOn: "n2", desc: "Skapa strukturen för nod-objekt (status, titlar, beskrivningar och dependency-logik)." },
+            "n4": { id: "n4", title: "Roadmap Loader", phase: 1, status: "locked", dependsOn: "n3", desc: "Skriv den asynkrona motorn som läser och skriver roadmap-datan mot Firebase." },
+            "n5": { id: "n5", title: "Roadmap SVG UI", phase: 1, status: "locked", dependsOn: "n4", desc: "Bygg containern och rita upp en organisk sammankopplad SVG-slinga på skärmen." },
+            "n6": { id: "n6", title: "Status-Färglogik", phase: 1, status: "locked", dependsOn: "n5", desc: "Implementera de reaktiva CSS/Tailwind-klasserna som skiftar nodernas färg live." },
+            
+            "n7": { id: "n7", title: "IndexedDB Schema", phase: 2, status: "locked", dependsOn: "n6", desc: "Definiera fasta tabeller för logs och settings i webbläsarens interna minne." },
+            "n8": { id: "n8", title: "Save/Load Logic", phase: 2, status: "locked", dependsOn: "n7", desc: "Bygg den blixtsnabba lokala bryggan mellan appens gränssnitt och IndexedDB-cache." },
+            "n9": { id: "n9", title: "Synk-motor", phase: 2, status: "locked", dependsOn: "n8", desc: "Skapa bakgrundsmotorn som automatiskt trycker upp sparad data vid internetanslutning." },
+            "n10": { id: "n10", title: "Conflict Resolution", phase: 2, status: "locked", dependsOn: "n9", desc: "Hantera synk-scenarier och data-kollisioner om du har varit offline en längre tid." },
+            "n11": { id: "n11", title: "Import/Export", phase: 2, status: "locked", dependsOn: "n10", desc: "Konstruera det manuella backupverktyget för råa JSON-filer." },
+            "n12": { id: "n12", title: "Cloudinary Integration", phase: 2, status: "locked", dependsOn: "n11", desc: "Sätt upp bild-token och form-uppladdningar direkt till din PrimalPath-mapp." },
+
+            "n13": { id: "n13", title: "Tab-Switcher", phase: 3, status: "locked", dependsOn: "n12", desc: "Optimera den logiska växelmotorn för smidig övergång mellan dina huvudflikar." },
+            "n14": { id: "n14", title: "Bottom-Nav", phase: 3, status: "locked", dependsOn: "n13", desc: "Gör bottenmenyn fixerad, taktil och ergonomiskt anpassad för enhandsanvändning." },
+            "n15": { id: "n15", title: "Responsive Grid", phase: 3, status: "locked", dependsOn: "n14", desc: "Finjustera appens layout så att den skalar perfekt över alla mobila enheter." },
+            "n16": { id: "n16", title: "Dark Mode/Theme", phase: 3, status: "locked", dependsOn: "n15", desc: "Lås färgpaletten till Temple-estetikens djupa, nattsvarta och smaragdgröna toner." },
+            "n17": { id: "n17", title: "PWA Manifest", phase: 3, status: "locked", dependsOn: "n16", desc: "Konfigurera manifest.json så att appen blir fullt installerbar som en native app på telefonen." },
+            "n18": { id: "n18", title: "Global State Manager", phase: 3, status: "locked", dependsOn: "n17", desc: "Skapa en central 'Store' som garanterar synkronisering av vald flik under körning." },
+
+            "n19": { id: "n19", title: "Workout Builder", phase: 4, status: "locked", dependsOn: "n18", desc: "Bygg gränssnittet för att addera/justera enskilda set, reps och vikter dynamiskt." },
+            "n20": { id: "n20", title: "Note Module", phase: 4, status: "locked", dependsOn: "n19", desc: "Implementera det tidsstämplade reflektionsfältet med automatisk expandering av textytan." },
+            "n21": { id: "n21", title: "Steg-kalkylator", phase: 4, status: "locked", dependsOn: "n20", desc: "Skriv logiken som sammanställer och aggregerar din vandringsdata över tid." },
+            "n22": { id: "n22", title: "Fysik-galleri", phase: 4, status: "locked", dependsOn: "n21", desc: "Skapa den kronologiska vyn som mappar och läser in dina formbilder från molnet." },
+            "n23": { id: "n23", title: "Volym-kalkylator", phase: 4, status: "locked", dependsOn: "n22", desc: "Utveckla beräkningsalgoritmen för passets ackumulerade tonnage (kg)." },
+            "n24": { id: "n24", title: "Rit-input", phase: 4, status: "locked", dependsOn: "n23", desc: "Sätt upp strikt inmatningsvalidering för den dagliga livskraften." },
+
+            "n25": { id: "n25", title: "Node Modal", phase: 5, status: "locked", dependsOn: "n24", desc: "Skapa informationspopupen för detaljer och operationer på enskilda noder." },
+            "n26": { id: "n26", title: "Dependency Checker", phase: 5, status: "locked", dependsOn: "n25", desc: "Kodlås som hindrar interaktion med noder vars fundament inte är slutfört." },
+            "n27": { id: "n27", title: "Bekräftelse-ruta", phase: 5, status: "locked", dependsOn: "n26", desc: "Skapa den dämpande pausen via modalen för att eliminera impulsiva felval." },
+            "n28": { id: "n28", title: "Status-update", phase: 5, status: "locked", dependsOn: "n27", desc: "Logiken som fastställer och sparar slutförda noder direkt i din databas." },
+            "n29": { id: "n29", title: "Cascade Reset", phase: 5, status: "locked", dependsOn: "n28", desc: "Logiken som låser om efterföljande noder rekursivt om du väljer att backa i din utveckling." },
+            "n30": { id: "n30", title: "System Prompt Integration", phase: 5, status: "locked", dependsOn: "n29", desc: "Injicera Väktarens djupa Björn-instruktioner direkt i AI-kommunikationen." },
+
+            "n31": { id: "n31", title: "Offline Stresstest", phase: 6, status: "locked", dependsOn: "n30", desc: "Kör rigorösa simuleringar för att testa datans hållbarhet under totalt nätverksbortfall." },
+            "n32": { id: "n32", title: "Firebase Rules", phase: 6, status: "locked", dependsOn: "n31", desc: "Skriv strikta säkerhetsregler i Firebase-konsolen så att enbart du kan nå din data." },
+            "n33": { id: "n33", title: "UX Polish", phase: 6, status: "locked", dependsOn: "n32", desc: "Finjustera appens mikromotioner och lägg till mjuka CSS-övergångar." },
+            "n34": { id: "n34", title: "Performance Audit", phase: 6, status: "locked", dependsOn: "n33", desc: "Eliminera renderingströghet och optimera appens asynkrona svarstider." },
+            "n35": { id: "n35", title: "Dokumentation", phase: 6, status: "locked", dependsOn: "n34", desc: "Sammanställ en minimalistisk README-fil som fungerar som din personliga kom-ihåg-lista." },
+            "n36": { id: "n36", title: "Store-Ready", phase: 6, status: "locked", dependsOn: "n35", desc: "Exportera sluthårdvara, app-ikoner, startskärmar och förbered paketering." }
         };
 
         function saveToIDB(logObj) {
@@ -367,7 +467,6 @@
                 if(data) {
                     const molnLogs = Object.values(data);
                     molnLogs.forEach(log => {
-                        // Spara till IDB, men bevara lokala osynkade flaggor om de finns
                         log.isSynced = true;
                         saveToIDB(log);
                     }); 
@@ -378,6 +477,21 @@
                     if(!currentInput) laddaInDatumTillInputs(aktivtDatum, false);
                     setSyncState('synced');
                 }
+            });
+
+            // Hämta och övervaka den datadrivna roadmapen i molnet (Fas 1, Nod 4)
+            database.ref(`users/${currentUser.uid}/devRoadmap`).on('value', snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    devRoadmap = data;
+                } else {
+                    devRoadmap = initialRoadmapData;
+                    database.ref(`users/${currentUser.uid}/devRoadmap`).set(devRoadmap);
+                }
+                if (document.getElementById('view-roadmap').classList.contains('active')) {
+                    renderRoadmap();
+                }
+                uppdateraRoadmapProgressBadge();
             });
 
             window.addEventListener('online', () => { setSyncState('synced'); hämtaOchKörKorgSynk(); });
@@ -445,18 +559,16 @@
             lucide.createIcons();
         }
 
-        // ================= JÄRNVÄG: STRIPPAD & REN LOKAL SPARING (PALETTO STYLE) =================
         function sparaDagensRit(visaAlert = false) {
             if (!currentUser) return;
             
-            // Vi sparar rådata lokalt DIREKT i IDB och sätter isSynced till false
             const nyLogg = {
                 id: aktivtDatum, 
                 date: new Date().toISOString(), 
                 steps: parseInt(document.getElementById('today-steps').value) || 0,
                 exercises: activeExercises, 
                 notes: activeNotesArray, 
-                images: activeImagesArray, // Innehåller redan existerande eller lokala temporära länkar
+                images: activeImagesArray, 
                 subjectiveFeel: { energyLevel: parseInt(document.getElementById('slider-livskraft').value), sleepQuality: parseInt(document.getElementById('slider-drommar').value), mentalFocus: parseInt(document.getElementById('slider-veder').value), mentalState: "", freeText: "" },
                 lastUpdated: Date.now(),
                 isSynced: false
@@ -478,7 +590,6 @@
             }
         }
 
-        // ================= JÄRNVÄG: SEPARAT ASYNKRONT KORGSYNKSYSTEM (PALETTO NATIVE) =================
         async function hämtaOchKörKorgSynk() {
             if (isSyncingEngineActive) return;
             isSyncingEngineActive = true;
@@ -496,10 +607,8 @@
             for (let logg of osynkadePoster) {
                 let bearbetadeBilder = [];
                 
-                // Om loggen har bilder som lagts till från pendingImagesQueue
                 if (logg.images && logg.images.length > 0) {
                     for (let img of logg.images) {
-                        // Kolla om bilden är en lokal råsträng/Blob som väntar på molnet
                         if (img.url && img.url.startsWith('data:image')) {
                             if (!cloudName || !uploadPreset) {
                                 console.warn("Cloudinary-uppgifter saknas under Inställningar. Hoppar över bildsynk.");
@@ -507,12 +616,11 @@
                                 continue;
                             }
                             
-                            // Kör exakt Palettos uppladdningsstruktur
                             const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
                             const formData = new FormData();
                             formData.append('file', img.url);
                             formData.append('upload_preset', uploadPreset);
-                            formData.append('folder', 'PrimalPath'); // Injiceras som fast sträng
+                            formData.append('folder', 'PrimalPath');
 
                             try {
                                 let res = await fetch(url, { method: 'POST', body: formData });
@@ -520,25 +628,23 @@
                                     let data = await res.json();
                                     bearbetadeBilder.push({ id: img.id, url: data.secure_url, timestamp: img.timestamp || Date.now() });
                                 } else {
-                                    bearbetadeBilder.push(img); // Behåll lokalt om det kraschar
+                                    bearbetadeBilder.push(img);
                                 }
                             } catch(e) {
                                 console.error("Cloudinary nätverksfel", e);
                                 bearbetadeBilder.push(img);
                             }
                         } else {
-                            bearbetadeBilder.push(img); // Redan en skarp Cloudinary URL
+                            bearbetadeBilder.push(img);
                         }
                     }
                     logg.images = bearbetadeBilder;
                 }
 
-                // När bilderna är hanterade sätter vi flaggan till true och sparar till molnet
                 logg.isSynced = true;
                 saveToIDB(logg);
 
                 try {
-                    // Kör en ren PUT-skrivning av objektet direkt till Firebase på dess ID-sträng (Datum)
                     await fetch(`${firebaseConfig.databaseURL}/users/${currentUser.uid}/logs/${logg.id}.json`, {
                         method: 'PUT',
                         body: JSON.stringify(logg)
@@ -551,7 +657,6 @@
             }
 
             isSyncingEngineActive = false;
-            // Kör en extra koll ifall nya ändringar gjorts under tiden
             let osynkadeKvar = logsData.filter(l => l.isSynced === false);
             if (osynkadeKvar.length === 0) {
                 setSyncState('synced');
@@ -559,7 +664,6 @@
             }
         }
 
-        // --- BILDHANTERING: LÄGG I KÖ UTAN ATT BLOCKERA ---
         function laggBildIKo(event) {
             const files = event.target.files;
             if(!files || files.length === 0) return;
@@ -568,7 +672,6 @@
                 const file = files[i];
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Vi sparar ner Base64-strängen direkt i kön precis som Paletto gör inför synk
                     pendingImagesQueue.push({ 
                         id: 'img_' + Date.now() + '_' + i, 
                         url: e.target.result 
@@ -583,14 +686,12 @@
         function renderImagesList() {
             const container = document.getElementById('active-images-list'); container.innerHTML = "";
             
-            // Visa redan sparade skarpa bilder
             activeImagesArray.forEach(img => {
                 let div = document.createElement('div'); div.className = "relative rounded-xl overflow-hidden border border-[#0d4737] h-20 bg-black";
                 div.innerHTML = `<img src="${img.url}" class="object-cover w-full h-full opacity-80 hover:opacity-100 transition-opacity"><button onclick="window.taBortBild('${img.id}', false)" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
                 container.appendChild(div);
             });
             
-            // Visa tillfälliga bilder i kön (gula ramar)
             pendingImagesQueue.forEach(pImg => {
                 let div = document.createElement('div'); div.className = "relative rounded-xl overflow-hidden border border-amber-500 h-20 bg-black opacity-70";
                 div.innerHTML = `<img src="${pImg.url}" class="object-cover w-full h-full"><div class="absolute inset-0 flex items-center justify-center"><i data-lucide="hourglass" class="w-6 h-6 text-amber-500 animate-spin"></i></div><button onclick="window.taBortBild('${pImg.id}', true)" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
@@ -607,13 +708,9 @@
 
         function sparaBildKo() {
             if(pendingImagesQueue.length === 0) return;
-            
-            // Flytta över kö-bilderna till aktiv array och töm kön
             activeImagesArray = [...activeImagesArray, ...pendingImagesQueue];
             pendingImagesQueue = [];
-            
             renderImagesList();
-            // Kör en tvingande sparasession som triggar igång korgmotorn
             sparaDagensRit(false);
         }
 
@@ -623,7 +720,6 @@
             renderImagesList(); sparaDagensRit(false);
         }
         
-        // --- FYSIK GALLERI ---
         function renderFysikGalleri() {
             const container = document.getElementById('fysik-gallery-container');
             if(!container) return; container.innerHTML = "";
@@ -649,7 +745,6 @@
             if(!hasImages) { container.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Inga fysiska bevis i kryptan ännu.</p>"; }
         }
 
-        // --- ANTECKNINGAR ---
         function laggTillEnskildAnteckning() { 
             const input = document.getElementById('today-notes-input'); const txt = input.value.trim(); if(!txt) return; 
             activeNotesArray.push({ id: Math.random().toString(36).substring(2,7), text: txt, timestamp: Date.now() }); 
@@ -662,7 +757,6 @@
             lucide.createIcons();
         }
 
-        // --- TRÄNINGSBUILDER ---
         function valjSidaForExercise(exId, valdSida) { const ex = activeExercises.find(e => e.id === exId); if (ex) { ex.side = valdSida; renderActiveWorkoutBuilder(); autoSparaData(); } }
         function valjNyOvning() { const sel = document.getElementById('exercise-selector'); if (!sel.value) return; activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: sel.value, metric: "reps", side: "both", sets: [{ reps: 10, weight: 21 }], timestamp: Date.now() }); sel.value = ""; renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
         function läggTillSet(exId) { const ex = activeExercises.find(e => e.id === exId); if (!ex) return; const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 21 }; ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight }); renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
@@ -719,9 +813,174 @@
 
         async function skickaChattMeddelande() { const input = document.getElementById('chat-input'); const msg = input.value.trim(); if(!msg) return; const chatBox = document.getElementById('chat-box'); chatBox.innerHTML += `<div class="temple-bg temple-border p-3 rounded-xl text-stone-200 text-right temple-shadow"><span class="text-[9px] text-emerald-400 block uppercase font-bold mb-1">Jonas</span>${msg}</div>`; input.value = ""; chatBox.scrollTop = chatBox.scrollHeight; const loaderId = 'vaktare-load-' + Date.now(); chatBox.innerHTML += `<div id="${loaderId}" class="temple-input-bg temple-border p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500 font-mono text-xs animate-pulse"><span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>Väktaren andas in...</div>`; chatBox.scrollTop = chatBox.scrollHeight; try { const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${firebaseConfig.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: msg }] }], systemInstruction: { parts: [{ text: "Du är Väktaren (Björnen)." }] } }) }); const data = await response.json(); document.getElementById(loaderId).classList.remove('animate-pulse'); let replyText = data.candidates && data.candidates[0] ? data.candidates[0].content.parts[0].text : "Väktaren är tyst."; document.getElementById(loaderId).innerHTML = `<span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>${replyText}`; } catch (err) { document.getElementById(loaderId).innerText = "Anropet blockerades."; } chatBox.scrollTop = chatBox.scrollHeight; }
 
-        function switchTab(tabId, btnElem) { document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500')); document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500')); document.getElementById(`view-${tabId}`).classList.add('active'); if(btnElem) { btnElem.classList.remove('text-stone-500'); btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); } lucide.createIcons(); if(tabId === 'rit') window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        // ================= KRYPTANS RITNINGAR ENGINE (FAS 1 & 5 NATIVE) =================
+        function renderRoadmap() {
+            const container = document.getElementById('roadmap-canvas-wrapper');
+            if (!container || !devRoadmap) return;
+            
+            // Bygg en responsiv, vertikalt slingrande SVG-vy över 36 noder
+            let svgHtml = `<svg viewBox="0 0 360 1460" class="w-full h-auto rounded-xl" style="background-color: #021611;">`;
+            
+            let currentPathD = "";
+            const positions = {};
+            let index = 0;
+            
+            // Beräkna koordinater för den organiska slingrörelsen
+            Object.keys(devRoadmap).sort((a,b) => parseInt(a.replace('n','')) - parseInt(b.replace('n',''))).forEach(key => {
+                let x = 180 + Math.sin(index * 0.84) * 85; 
+                let y = 45 + index * 39;
+                positions[key] = { x, y };
+                
+                if (index === 0) currentPathD += `M ${x} ${y}`;
+                else currentPathD += ` L ${x} ${y}`;
+                index++;
+            });
+            
+            // Rita banans ryggrad (SVG Path)
+            svgHtml += `<path d="${currentPathD}" fill="none" stroke="#063527" stroke-width="3" stroke-dasharray="4 5" />`;
+            
+            // Rendera varje individuell nod som ett interaktivt SVG-element (Fas 1, Nod 5 & 6)
+            Object.keys(devRoadmap).sort((a,b) => parseInt(a.replace('n','')) - parseInt(b.replace('n',''))).forEach(key => {
+                const node = devRoadmap[key];
+                const pos = positions[key];
+                
+                let fill = "#1c1917"; 
+                let stroke = "#292524";
+                let pulseClass = "";
+                let textColor = "#4b5563";
+                
+                if (node.status === 'completed') {
+                    fill = "#047857"; stroke = "#10b981"; textColor = "#e7e5e4";
+                } else if (node.status === 'pending') {
+                    fill = "#9a3412"; stroke = "#f59e0b"; pulseClass = "node-pulse"; textColor = "#white";
+                }
+                
+                svgHtml += `
+                <g class="cursor-pointer select-none" onclick="window.oppnaNodModal('${node.id}')">
+                    <circle cx="${pos.x}" cy="${pos.y}" r="11" fill="${fill}" stroke="${stroke}" stroke-width="2" class="${pulseClass}" />
+                    <text x="${pos.x}" y="${pos.y + 3}" font-family="monospace" font-size="8" font-weight="black" fill="#ffffff" text-anchor="middle">${node.id.toUpperCase()}</text>
+                    <text x="${pos.x > 180 ? pos.x - 16 : pos.x + 16}" y="${pos.y + 3}" font-family="monospace" font-size="9" fill="${textColor}" text-anchor="${pos.x > 180 ? 'end' : 'start'}" font-weight="${node.status === 'pending' ? 'bold' : 'normal'}">${node.title}</text>
+                </g>`;
+            });
+            
+            svgHtml += `</svg>`;
+            container.innerHTML = svgHtml;
+        }
+
+        function uppdateraRoadmapProgressBadge() {
+            if (!devRoadmap) return;
+            const total = Object.keys(devRoadmap).length;
+            const klara = Object.values(devRoadmap).filter(n => n.status === 'completed').length;
+            document.getElementById('roadmap-progress-badge').innerText = `${klara}/${total} Klara`;
+        }
+
+        function oppnaNodModal(nodeId) {
+            const node = devRoadmap[nodeId];
+            if (!node) return;
+            
+            document.getElementById('rm-modal-id-badge').innerText = nodeId.toUpperCase();
+            document.getElementById('rm-modal-title').innerText = node.title;
+            document.getElementById('rm-modal-phase').innerText = `FAS ${node.phase}`;
+            document.getElementById('rm-modal-desc').innerText = node.desc;
+            
+            const textDisplay = document.getElementById('rm-modal-status-text');
+            const actionBtn = document.getElementById('rm-btn-action');
+            
+            if (node.status === 'locked') {
+                textDisplay.className = "text-stone-600 font-bold";
+                textDisplay.innerText = "LÅST AV GRINDVAKTEN";
+                actionBtn.classList.add('hidden');
+            } else if (node.status === 'pending') {
+                textDisplay.className = "text-amber-500 font-bold animate-pulse";
+                textDisplay.innerText = "PENDING / AKTIV";
+                actionBtn.classList.remove('hidden');
+                actionBtn.className = "w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold font-mono text-xs rounded-xl uppercase transition-all";
+                actionBtn.innerText = "Markera som klar";
+                actionBtn.onclick = () => window.begarNodStatusAndring(nodeId, 'completed');
+            } else if (node.status === 'completed') {
+                textDisplay.className = "text-emerald-500 font-bold";
+                textDisplay.innerText = "SLUTFÖRD & SÄKRAD";
+                actionBtn.classList.remove('hidden');
+                actionBtn.className = "w-full py-2.5 bg-amber-700 hover:bg-amber-600 text-white font-bold font-mono text-xs rounded-xl uppercase transition-all";
+                actionBtn.innerText = "Ångra / Öppna steg";
+                actionBtn.onclick = () => window.begarNodStatusAndring(nodeId, 'pending');
+            }
+            
+            document.getElementById('roadmap-modal').classList.remove('hidden');
+        }
+
+        // Grindvaktens Anti-Impuls Modallager (Fas 5, Nod 27)
+        function begarNodStatusAndring(nodeId, nyStatus) {
+            const modalConfirm = document.getElementById('roadmap-confirm-modal');
+            const txt = document.getElementById('rm-confirm-text');
+            
+            if (nyStatus === 'pending') {
+                txt.innerText = "⚠️ VARNING: Om du ångrar detta steg kommer Grindvakten automatiskt låsa om alla efterföljande noder i kedjan. Vill du fortsätta?";
+            } else {
+                txt.innerText = "Är du helt säker på att du har slutfört denna utvecklingsnod i din miljö?";
+            }
+            
+            modalConfirm.classList.remove('hidden');
+            
+            document.getElementById('rm-btn-confirm-yes').onclick = () => {
+                modalConfirm.classList.add('hidden');
+                exekveraNodSkifte(nodeId, nyStatus);
+            };
+            document.getElementById('rm-btn-confirm-no').onclick = () => {
+                modalConfirm.classList.add('hidden');
+            };
+        }
+
+        // Kaskad-återställning och Synkronisering (Fas 5, Nod 28 & 29)
+        function exekveraNodSkifte(nodeId, nyStatus) {
+            const index = parseInt(nodeId.replace('n', ''));
+            
+            if (nyStatus === 'completed') {
+                devRoadmap[nodeId].status = 'completed';
+                const nextKey = 'n' + (index + 1);
+                if (devRoadmap[nextKey] && devRoadmap[nextKey].status === 'locked') {
+                    devRoadmap[nextKey].status = 'pending';
+                }
+            } else if (nyStatus === 'pending') {
+                devRoadmap[nodeId].status = 'pending';
+                // Cascade Reset Engine: Sätter rekursivt alla efterföljande noder till 'locked'
+                for (let i = index + 1; i <= 36; i++) {
+                    const futureKey = 'n' + i;
+                    if (devRoadmap[futureKey]) devRoadmap[futureKey].status = 'locked';
+                }
+            }
+            
+            // Spara synkroniserat till Firebase (Fas 1, Nod 4)
+            if (currentUser) {
+                database.ref(`users/${currentUser.uid}/devRoadmap`).set(devRoadmap);
+            }
+            
+            renderRoadmap();
+            uppdateraRoadmapProgressBadge();
+            document.getElementById('roadmap-modal').classList.add('hidden');
+        }
+
+        function switchTab(tabId, btnElem) { 
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); 
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500')); 
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500')); 
+            
+            document.getElementById(`view-${tabId}`).classList.add('active'); 
+            if(btnElem) { 
+                btnElem.classList.remove('text-stone-500'); 
+                btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); 
+            } 
+            lucide.createIcons(); 
+            
+            if(tabId === 'rit') window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            if(tabId === 'roadmap') renderRoadmap(); // Auto-rendering när kartan öppnas
+        }
 
         window.hanteraAuth = hanteraAuth; window.loggaUt = loggaUt; window.switchTab = switchTab; window.valjNyOvning = valjNyOvning; window.läggTillSet = läggTillSet; window.taBortSet = taBortSet; window.uppdateraSetData = uppdateraSetData; window.sparaDagensRit = sparaDagensRit; window.autoSparaData = autoSparaData; window.importeraMasterDataDirekt = importeraMasterDataDirekt; window.redigeraPass = redigeraPass; window.raderaPass = raderaPass; window.nollstallTillIdag = nollstallTillIdag; window.toggleCollapseCard = toggleCollapseCard; window.valjSidaForExercise = valjSidaForExercise; window.skickaChattMeddelande = skickaChattMeddelande; window.exporteraMasterDataLive = exporteraMasterDataLive; window.laggTillEnskildAnteckning = laggTillEnskildAnteckning; window.taBortEnskildAnteckning = taBortEnskildAnteckning; window.laggBildIKo = laggBildIKo; window.taBortBild = taBortBild; window.sparaBildKo = sparaBildKo; window.rensaIndexedDB = rensaIndexedDB; window.rensaSkarmForNyDag = rensaSkarmForNyDag; window.byggKalender = byggKalender; window.andraManad = andraManad; window.valjKalenderDag = valjKalenderDag;
+        
+        // Exponera de nya Roadmap-funktionerna till det globala fönstret
+        window.oppnaNodModal = oppnaNodModal;
+        window.begarNodStatusAndring = begarNodStatusAndring;
 
         lucide.createIcons();
     </script>
