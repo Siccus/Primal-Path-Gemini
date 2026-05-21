@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#021a14">
-    <title>Primal Path Gemini | Gen 2.4.0</title>
+    <title>Primal Path Gemini | Gen 3.0.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -30,7 +30,11 @@
         .calendar-cell { position: relative; z-index: 10; pointer-events: auto; }
 
         /* Roadmap Animations */
-        @keyframes pulseOrange { 0% { stroke-width: 2px; stroke-opacity: 1; } 50% { stroke-width: 4px; stroke-opacity: 0.5; } 100% { stroke-width: 2px; stroke-opacity: 1; } }
+        @keyframes pulseOrange {
+            0% { stroke-width: 2px; stroke-opacity: 1; }
+            50% { stroke-width: 4px; stroke-opacity: 0.5; }
+            100% { stroke-width: 2px; stroke-opacity: 1; }
+        }
         .node-pulse { animation: pulseOrange 2s infinite ease-in-out; }
     </style>
 </head>
@@ -63,7 +67,7 @@
                 <h1 class="text-xl font-black tracking-tighter text-white font-mono flex items-center gap-1.5">
                     <i data-lucide="zap" class="text-amber-500 fill-amber-500/20 w-5 h-5"></i> PRIMAL PATH
                 </h1>
-                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">GEN 2.4.0 • PALETTO ENGINE</p>
+                <p class="text-[9px] font-mono uppercase tracking-widest text-emerald-500 mt-0.5">GEN 3.0.0 • PALETTO ENGINE</p>
             </div>
             <div class="flex items-center gap-3">
                 <div id="sync-indicator" class="text-amber-500 transition-all" title="Väntar på synk">
@@ -961,21 +965,7 @@
             document.getElementById('roadmap-modal').classList.add('hidden');
         }
 
-        function switchTab(tabId, btnElem) { 
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); 
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500')); 
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500')); 
-            
-            document.getElementById(`view-${tabId}`).classList.add('active'); 
-            if(btnElem) { 
-                btnElem.classList.remove('text-stone-500'); 
-                btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); 
-            } 
-            lucide.createIcons(); 
-            
-            if(tabId === 'rit') window.scrollTo({ top: 0, behavior: 'smooth' }); 
-            if(tabId === 'roadmap') renderRoadmap(); 
-        }
+        function switchTab(tabId, btnElem) { document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500')); document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500')); document.getElementById(`view-${tabId}`).classList.add('active'); if(btnElem) { btnElem.classList.remove('text-stone-500'); btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); } lucide.createIcons(); if(tabId === 'rit') window.scrollTo({ top: 0, behavior: 'smooth' }); if(tabId === 'roadmap') renderRoadmap(); }
 
         window.hanteraAuth = hanteraAuth; window.loggaUt = loggaUt; window.switchTab = switchTab; window.valjNyOvning = valjNyOvning; window.läggTillSet = läggTillSet; window.taBortSet = taBortSet; window.uppdateraSetData = uppdateraSetData; window.sparaDagensRit = sparaDagensRit; window.autoSparaData = autoSparaData; window.importeraMasterDataDirekt = importeraMasterDataDirekt; window.redigeraPass = redigeraPass; window.raderaPass = raderaPass; window.nollstallTillIdag = nollstallTillIdag; window.toggleCollapseCard = toggleCollapseCard; window.valjSidaForExercise = valjSidaForExercise; window.skickaChattMeddelande = skickaChattMeddelande; window.exporteraMasterDataLive = exporteraMasterDataLive; window.laggTillEnskildAnteckning = laggTillEnskildAnteckning; window.taBortEnskildAnteckning = taBortEnskildAnteckning; window.laggBildIKo = laggBildIKo; window.taBortBild = taBortBild; window.sparaBildKo = sparaBildKo; window.rensaIndexedDB = rensaIndexedDB; window.rensaSkarmForNyDag = rensaSkarmForNyDag; window.byggKalender = byggKalender; window.andraManad = andraManad; window.valjKalenderDag = valjKalenderDag;
         
