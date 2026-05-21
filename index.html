@@ -60,6 +60,11 @@
         </div>
     </div>
 
+    <div id="global-lightbox" class="hidden fixed inset-0 bg-black/95 z-[200] flex items-center justify-center p-4 backdrop-blur-md" onclick="this.classList.add('hidden')">
+        <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl border border-[#0d4737]" onclick="event.stopPropagation()">
+        <button onclick="document.getElementById('global-lightbox').classList.add('hidden')" class="absolute top-6 right-6 text-stone-400 hover:text-white bg-black/50 p-2 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
+    </div>
+
     <div class="max-w-md mx-auto px-4 pt-6 space-y-5">
         
         <header class="flex justify-between items-center border-b border-[#053527] pb-3">
@@ -103,25 +108,25 @@
                 <div class="space-y-1">
                     <div class="flex justify-between font-mono text-xs">
                         <span class="text-stone-400 font-bold uppercase tracking-wider">Energi (Livskraft)</span>
-                        <span class="text-white font-black"><span id="val-livskraft">8</span> / 10</span>
+                        <span class="text-white font-black"><span id="val-livskraft">8</span> / 12</span>
                     </div>
-                    <input type="range" id="slider-livskraft" min="1" max="10" value="8" oninput="document.getElementById('val-livskraft').innerText=this.value; window.autoSparaData();" class="w-full accent-amber-500 h-1.5 temple-input-bg rounded-lg appearance-none cursor-pointer">
+                    <input type="range" id="slider-livskraft" min="0" max="12" value="8" oninput="document.getElementById('val-livskraft').innerText=this.value; window.autoSparaData();" class="w-full accent-amber-500 h-1.5 temple-input-bg rounded-lg appearance-none cursor-pointer">
                 </div>
 
                 <div class="space-y-1">
                     <div class="flex justify-between font-mono text-xs">
                         <span class="text-stone-400 font-bold uppercase tracking-wider">Sömnkvalitet</span>
-                        <span class="text-white font-black"><span id="val-drommar">8</span> / 10</span>
+                        <span class="text-white font-black"><span id="val-drommar">8</span> / 12</span>
                     </div>
-                    <input type="range" id="slider-drommar" min="1" max="10" value="8" oninput="document.getElementById('val-drommar').innerText=this.value; window.autoSparaData();" class="w-full accent-indigo-500 h-1.5 temple-input-bg rounded-lg appearance-none cursor-pointer">
+                    <input type="range" id="slider-drommar" min="0" max="12" value="8" oninput="document.getElementById('val-drommar').innerText=this.value; window.autoSparaData();" class="w-full accent-indigo-500 h-1.5 temple-input-bg rounded-lg appearance-none cursor-pointer">
                 </div>
 
                 <div class="space-y-1">
                     <div class="flex justify-between font-mono text-xs">
                         <span class="text-stone-400 font-bold uppercase tracking-wider">Mentalt Fokus</span>
-                        <span class="text-white font-black"><span id="val-veder">9</span> / 10</span>
+                        <span class="text-white font-black"><span id="val-veder">9</span> / 12</span>
                     </div>
-                    <input type="range" id="slider-veder" min="1" max="10" value="9" oninput="document.getElementById('val-veder').innerText=this.value; window.autoSparaData();" class="w-full accent-emerald-500 h-1.5 temple-input-bg rounded-lg appearance-none cursor-pointer">
+                    <input type="range" id="slider-veder" min="0" max="12" value="9" oninput="document.getElementById('val-veder').innerText=this.value; window.autoSparaData();" class="w-full accent-emerald-500 h-1.5 temple-input-bg rounded-lg appearance-none cursor-pointer">
                 </div>
 
                 <div class="space-y-2 pt-2 border-t border-[#0d4737]/40">
@@ -201,8 +206,7 @@
                 <h2 class="text-xl font-black tracking-tight text-white">Min Fysik</h2>
                 <p class="text-xs text-stone-400">Visuell dokumentation av templet.</p>
             </div>
-            <div id="fysik-gallery-container" class="space-y-6 pt-2">
-                </div>
+            <div id="fysik-gallery-container" class="space-y-6 pt-2"></div>
         </main>
 
         <main id="view-skadande" class="tab-content space-y-4">
@@ -362,10 +366,10 @@
         let activeExercises = [];
         let activeNotesArray = []; 
         let activeImagesArray = []; 
-        let pendingImagesQueue = []; // Lokala förhandsgranskningar (Blob/DataURL)
+        let pendingImagesQueue = []; 
         let isSyncingEngineActive = false;
         
-        let devRoadmap = null; // Master Blueprint state
+        let devRoadmap = null;
         const initialRoadmapData = {
             "n1": { id: "n1", title: "Repo & Mappstruktur", phase: 1, status: "pending", dependsOn: null, desc: "Etablera ren lokal filstruktur för assets, js, css och data." },
             "n2": { id: "n2", title: "Firebase Setup", phase: 1, status: "locked", dependsOn: "n1", desc: "Initiera Auth & Database-moduler och lås ner konfigurationsnycklarna säkert." },
@@ -456,13 +460,11 @@
                 }
             });
 
-            // Spegla molnet till lokal cache
             database.ref(`users/${currentUser.uid}/logs`).on('value', snapshot => {
                 const data = snapshot.val();
                 if(data) {
                     const molnLogs = Object.values(data);
                     molnLogs.forEach(log => {
-                        // Spara till IDB, men bevara lokala osynkade flaggor om de finns
                         log.isSynced = true;
                         saveToIDB(log);
                     }); 
@@ -507,6 +509,7 @@
             if(typ === 'LOGGA_IN') { auth.signInWithEmailAndPassword(email, password).catch(err => errBox.innerText = err.message); } 
             else { auth.createUserWithEmailAndPassword(email, password).then(cred => { database.ref(`users/${cred.user.uid}/profile`).set({ created: Date.now(), persona: "BEAR" }); }).catch(err => errBox.innerText = err.message); }
         }
+        
         function loggaUt() { auth.signOut().then(() => location.reload()); }
 
         function byggKalender() {
@@ -554,19 +557,23 @@
             lucide.createIcons();
         }
 
-        // ================= JÄRNVÄG: STRIPPAD & REN LOKAL SPARING (PALETTO STYLE) =================
         function sparaDagensRit(visaAlert = false) {
             if (!currentUser) return;
             
-            // Vi sparar rådata lokalt DIREKT i IDB och sätter isSynced till false
             const nyLogg = {
                 id: aktivtDatum, 
                 date: new Date().toISOString(), 
                 steps: parseInt(document.getElementById('today-steps').value) || 0,
                 exercises: activeExercises, 
                 notes: activeNotesArray, 
-                images: activeImagesArray, // Innehåller redan existerande eller lokala temporära länkar
-                subjectiveFeel: { energyLevel: parseInt(document.getElementById('slider-livskraft').value), sleepQuality: parseInt(document.getElementById('slider-drommar').value), mentalFocus: parseInt(document.getElementById('slider-veder').value), mentalState: "", freeText: "" },
+                images: activeImagesArray,
+                subjectiveFeel: { 
+                    energyLevel: parseInt(document.getElementById('slider-livskraft').value), 
+                    sleepQuality: parseInt(document.getElementById('slider-drommar').value), 
+                    mentalFocus: parseInt(document.getElementById('slider-veder').value), 
+                    mentalState: "", 
+                    freeText: "" 
+                },
                 lastUpdated: Date.now(),
                 isSynced: false
             };
@@ -587,7 +594,6 @@
             }
         }
 
-        // ================= JÄRNVÄG: SEPARAT ASYNKRONT KORGSYNKSYSTEM (PALETTO NATIVE) =================
         async function hämtaOchKörKorgSynk() {
             if (isSyncingEngineActive) return;
             isSyncingEngineActive = true;
@@ -605,10 +611,8 @@
             for (let logg of osynkadePoster) {
                 let bearbetadeBilder = [];
                 
-                // Om loggen har bilder som lagts till från pendingImagesQueue
                 if (logg.images && logg.images.length > 0) {
                     for (let img of logg.images) {
-                        // Kolla om bilden är en lokal råsträng/Blob som väntar på molnet
                         if (img.url && img.url.startsWith('data:image')) {
                             if (!cloudName || !uploadPreset) {
                                 console.warn("Cloudinary-uppgifter saknas under Inställningar. Hoppar över bildsynk.");
@@ -616,12 +620,11 @@
                                 continue;
                             }
                             
-                            // Kör exakt Palettos uppladdningsstruktur
                             const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
                             const formData = new FormData();
                             formData.append('file', img.url);
                             formData.append('upload_preset', uploadPreset);
-                            formData.append('folder', 'PrimalPath'); // Injiceras som fast sträng
+                            formData.append('folder', 'PrimalPath');
 
                             try {
                                 let res = await fetch(url, { method: 'POST', body: formData });
@@ -629,25 +632,23 @@
                                     let data = await res.json();
                                     bearbetadeBilder.push({ id: img.id, url: data.secure_url, timestamp: img.timestamp || Date.now() });
                                 } else {
-                                    bearbetadeBilder.push(img); // Behåll lokalt om det kraschar
+                                    bearbetadeBilder.push(img);
                                 }
                             } catch(e) {
                                 console.error("Cloudinary nätverksfel", e);
                                 bearbetadeBilder.push(img);
                             }
                         } else {
-                            bearbetadeBilder.push(img); // Redan en skarp Cloudinary URL
+                            bearbetadeBilder.push(img);
                         }
                     }
                     logg.images = bearbetadeBilder;
                 }
 
-                // När bilderna är hanterade sätter vi flaggan till true och sparar till molnet
                 logg.isSynced = true;
                 saveToIDB(logg);
 
                 try {
-                    // Kör en ren PUT-skrivning av objektet direkt till Firebase på dess ID-sträng (Datum)
                     await fetch(`${firebaseConfig.databaseURL}/users/${currentUser.uid}/logs/${logg.id}.json`, {
                         method: 'PUT',
                         body: JSON.stringify(logg)
@@ -660,7 +661,6 @@
             }
 
             isSyncingEngineActive = false;
-            // Kör en extra koll ifall nya ändringar gjorts under tiden
             let osynkadeKvar = logsData.filter(l => l.isSynced === false);
             if (osynkadeKvar.length === 0) {
                 setSyncState('synced');
@@ -668,7 +668,6 @@
             }
         }
 
-        // --- BILDHANTERING: LÄGG I KÖ UTAN ATT BLOCKERA ---
         function laggBildIKo(event) {
             const files = event.target.files;
             if(!files || files.length === 0) return;
@@ -677,7 +676,6 @@
                 const file = files[i];
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Vi sparar ner Base64-strängen direkt i kön precis som Paletto gör inför synk
                     pendingImagesQueue.push({ 
                         id: 'img_' + Date.now() + '_' + i, 
                         url: e.target.result 
@@ -690,18 +688,19 @@
         }
 
         function renderImagesList() {
-            const container = document.getElementById('active-images-list'); container.innerHTML = "";
+            const container = document.getElementById('active-images-list'); 
+            container.innerHTML = "";
             
-            // Visa redan sparade skarpa bilder
             activeImagesArray.forEach(img => {
-                let div = document.createElement('div'); div.className = "relative rounded-xl overflow-hidden border border-[#0d4737] h-20 bg-black";
-                div.innerHTML = `<img src="${img.url}" class="object-cover w-full h-full opacity-80 hover:opacity-100 transition-opacity"><button onclick="window.taBortBild('${img.id}', false)" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
+                let div = document.createElement('div'); 
+                div.className = "relative rounded-xl overflow-hidden border border-[#0d4737] h-20 bg-black";
+                div.innerHTML = `<img src="${img.url}" class="object-cover w-full h-full opacity-80 hover:opacity-100 transition-opacity cursor-pointer" onclick="window.openLightbox('${img.url}')"><button onclick="window.taBortBild('${img.id}', false)" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
                 container.appendChild(div);
             });
             
-            // Visa tillfälliga bilder i kön (gula ramar)
             pendingImagesQueue.forEach(pImg => {
-                let div = document.createElement('div'); div.className = "relative rounded-xl overflow-hidden border border-amber-500 h-20 bg-black opacity-70";
+                let div = document.createElement('div'); 
+                div.className = "relative rounded-xl overflow-hidden border border-amber-500 h-20 bg-black opacity-70";
                 div.innerHTML = `<img src="${pImg.url}" class="object-cover w-full h-full"><div class="absolute inset-0 flex items-center justify-center"><i data-lucide="hourglass" class="w-6 h-6 text-amber-500 animate-spin"></i></div><button onclick="window.taBortBild('${pImg.id}', true)" class="absolute top-1 right-1 bg-black/60 rounded-full p-1 text-white hover:text-red-400"><i data-lucide="x" class="w-3 h-3"></i></button>`;
                 container.appendChild(div);
             });
@@ -716,117 +715,430 @@
 
         function sparaBildKo() {
             if(pendingImagesQueue.length === 0) return;
-            
-            // Flytta över kö-bilderna till aktiv array och töm kön
             activeImagesArray = [...activeImagesArray, ...pendingImagesQueue];
             pendingImagesQueue = [];
-            
             renderImagesList();
-            // Kör en tvingande sparasession som triggar igång korgmotorn
             sparaDagensRit(false);
         }
 
         function taBortBild(imgId, isPending) {
-            if(isPending) { pendingImagesQueue = pendingImagesQueue.filter(i => i.id !== imgId); } 
-            else { activeImagesArray = activeImagesArray.filter(i => i.id !== imgId); }
-            renderImagesList(); sparaDagensRit(false);
+            if(isPending) { 
+                pendingImagesQueue = pendingImagesQueue.filter(i => i.id !== imgId); 
+            } else { 
+                if(!confirm("Vill du verkligen radera bilden permanent från kryptan?")) return;
+                activeImagesArray = activeImagesArray.filter(i => i.id !== imgId); 
+            }
+            renderImagesList(); 
+            sparaDagensRit(false);
         }
         
-        // --- FYSIK GALLERI ---
         function renderFysikGalleri() {
             const container = document.getElementById('fysik-gallery-container');
-            if(!container) return; container.innerHTML = "";
+            if(!container) return; 
+            container.innerHTML = "";
             
             let hasImages = false;
             logsData.forEach(log => {
                 if(log.images && log.images.length > 0) {
                     hasImages = true;
-                    let section = document.createElement('div'); section.className = "space-y-2 mb-6";
-                    let header = document.createElement('h4'); header.className = "text-emerald-500 font-mono text-xs font-bold border-b border-[#0d4737] pb-1 uppercase tracking-widest"; header.innerText = log.id;
+                    let section = document.createElement('div'); 
+                    section.className = "space-y-2 mb-6";
+                    
+                    let header = document.createElement('h4'); 
+                    header.className = "text-emerald-500 font-mono text-xs font-bold border-b border-[#0d4737] pb-1 uppercase tracking-widest"; 
+                    header.innerText = log.id;
                     section.appendChild(header);
                     
-                    let grid = document.createElement('div'); grid.className = "grid grid-cols-3 gap-2";
+                    let grid = document.createElement('div'); 
+                    grid.className = "grid grid-cols-3 gap-2";
+                    
                     log.images.forEach(img => {
                         let src = typeof img === 'string' ? img : img.url;
-                        let imgDiv = document.createElement('div'); imgDiv.className = "aspect-square rounded-xl overflow-hidden border border-[#0d4737] temple-shadow";
-                        imgDiv.innerHTML = `<img src="${src}" class="object-cover w-full h-full opacity-90 hover:opacity-100 transition-opacity">`;
+                        let imgDiv = document.createElement('div'); 
+                        imgDiv.className = "aspect-square rounded-xl overflow-hidden border border-[#0d4737] temple-shadow";
+                        imgDiv.innerHTML = `<img src="${src}" class="object-cover w-full h-full opacity-90 hover:opacity-100 transition-opacity cursor-pointer" onclick="window.openLightbox('${src}')">`;
                         grid.appendChild(imgDiv);
                     });
-                    section.appendChild(grid); container.appendChild(section);
+                    
+                    section.appendChild(grid); 
+                    container.appendChild(section);
                 }
             });
-            if(!hasImages) { container.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Inga fysiska bevis i kryptan ännu.</p>"; }
+            if(!hasImages) { 
+                container.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Inga fysiska bevis i kryptan ännu.</p>"; 
+            }
         }
 
-        // --- ANTECKNINGAR ---
         function laggTillEnskildAnteckning() { 
-            const input = document.getElementById('today-notes-input'); const txt = input.value.trim(); if(!txt) return; 
+            const input = document.getElementById('today-notes-input'); 
+            const txt = input.value.trim(); 
+            if(!txt) return; 
             activeNotesArray.push({ id: Math.random().toString(36).substring(2,7), text: txt, timestamp: Date.now() }); 
-            input.value = ""; input.style.height = '36px'; renderNotesList(); sparaDagensRit(false); 
+            input.value = ""; 
+            input.style.height = '36px'; 
+            renderNotesList(); 
+            sparaDagensRit(false); 
         }
-        function taBortEnskildAnteckning(noteId) { activeNotesArray = activeNotesArray.filter(n => n.id !== noteId); renderNotesList(); autoSparaData(); }
+
+        function taBortEnskildAnteckning(noteId) { 
+            activeNotesArray = activeNotesArray.filter(n => n.id !== noteId); 
+            renderNotesList(); 
+            autoSparaData(); 
+        }
+
         function renderNotesList() {
-            const container = document.getElementById('active-notes-list'); container.innerHTML = "";
-            activeNotesArray.forEach(n => { const noteTime = n.timestamp ? new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : ''; let d = document.createElement('div'); d.className = "flex justify-between items-center temple-input-bg p-2 rounded-xl border border-[#0d4737]/40 text-xs text-stone-300 font-mono"; d.innerHTML = `<span><span class="text-stone-500 mr-1.5">${noteTime}</span>${n.text}</span><button onclick="window.taBortEnskildAnteckning('${n.id}')" class="text-stone-600 hover:text-red-400 px-1"><i data-lucide="x" class="w-3 h-3"></i></button>`; container.appendChild(d); });
+            const container = document.getElementById('active-notes-list'); 
+            container.innerHTML = "";
+            activeNotesArray.forEach(n => { 
+                const noteTime = n.timestamp ? new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : ''; 
+                let d = document.createElement('div'); 
+                d.className = "flex justify-between items-center temple-input-bg p-2 rounded-xl border border-[#0d4737]/40 text-xs text-stone-300 font-mono"; 
+                d.innerHTML = `<span><span class="text-stone-500 mr-1.5">${noteTime}</span>${n.text}</span><button onclick="window.taBortEnskildAnteckning('${n.id}')" class="text-stone-600 hover:text-red-400 px-1"><i data-lucide="x" class="w-3 h-3"></i></button>`; 
+                container.appendChild(d); 
+            });
             lucide.createIcons();
         }
 
-        // --- TRÄNINGSBUILDER ---
-        function valjSidaForExercise(exId, valdSida) { const ex = activeExercises.find(e => e.id === exId); if (ex) { ex.side = valdSida; renderActiveWorkoutBuilder(); autoSparaData(); } }
-        function valjNyOvning() { const sel = document.getElementById('exercise-selector'); if (!sel.value) return; activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: sel.value, metric: "reps", side: "both", sets: [{ reps: 10, weight: 21 }], timestamp: Date.now() }); sel.value = ""; renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
-        function läggTillSet(exId) { const ex = activeExercises.find(e => e.id === exId); if (!ex) return; const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 21 }; ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight }); renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
-        function taBortSet(exId, setIdx) { const ex = activeExercises.find(e => e.id === exId); if (!ex) return; ex.sets.splice(setIdx, 1); if (ex.sets.length === 0) activeExercises = activeExercises.filter(e => e.id !== exId); renderActiveWorkoutBuilder(); raknaOmVolym(); autoSparaData(); }
-        function uppdateraSetData(exId, setIdx, fält, värde) { const ex = activeExercises.find(e => e.id === exId); if (ex && ex.sets[setIdx]) ex.sets[setIdx][fält] = parseFloat(värde) || 0; raknaOmVolym(); autoSparaData(); }
-        function renderActiveWorkoutBuilder() {
-            const container = document.getElementById('active-workout-builder'); container.innerHTML = "";
-            activeExercises.forEach(ex => {
-                const currentSide = ex.side || "both"; let card = document.createElement('div'); card.className = "temple-input-bg border border-[#0d4737] rounded-xl p-3 space-y-2";
-                card.innerHTML = `<div class="flex justify-between items-center border-b border-[#0d4737]/60 pb-1"><span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide"><i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}</span><div class="flex items-center gap-1 font-mono text-[9px] font-bold"><button onclick="window.valjSidaForExercise('${ex.id}', 'left')" class="px-2 py-0.5 rounded ${currentSide === 'left' ? 'bg-amber-600 text-white' : 'temple-bg text-stone-500'}">V</button><button onclick="window.valjSidaForExercise('${ex.id}', 'both')" class="px-2 py-0.5 rounded ${currentSide === 'both' ? 'bg-emerald-700 text-white' : 'temple-bg text-stone-500'}">B</button><button onclick="window.valjSidaForExercise('${ex.id}', 'right')" class="px-2 py-0.5 rounded ${currentSide === 'right' ? 'bg-amber-600 text-white' : 'temple-bg text-stone-500'}">H</button></div></div><div class="space-y-1.5">${ex.sets.map((set, idx) => `<div class="flex items-center justify-between bg-[#03241b]/40 p-2 rounded-lg border border-[#0d4737]/30 gap-2 font-mono text-xs"><span class="text-[10px] text-emerald-700 font-bold">#${idx + 1}</span><div class="flex items-center gap-1.5 flex-1 justify-end"><input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 temple-input-bg temple-border rounded text-center py-0.5 text-white focus:outline-none"><span class="text-[9px] text-stone-500">reps</span><input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 temple-input-bg temple-border rounded text-center py-0.5 text-white focus:outline-none"><span class="text-[9px] text-stone-500">kg</span><button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button></div></div>`).join('')}</div><button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 temple-bg text-stone-400 text-[10px] font-mono rounded-lg border border-[#0d4737] mt-1.5">+ SET</button>`; container.appendChild(card);
-            }); lucide.createIcons();
+        function valjSidaForExercise(exId, valdSida) { 
+            const ex = activeExercises.find(e => e.id === exId); 
+            if (ex) { ex.side = valdSida; renderActiveWorkoutBuilder(); autoSparaData(); } 
         }
-        function raknaOmVolym() { let total = 0; activeExercises.forEach(ex => ex.sets.forEach(s => total += (s.reps*s.weight))); document.getElementById('live-vol-display').innerText = `${total.toLocaleString('sv-SE')} kg`; }
 
-        function rensaSkarmForNyDag() { if(confirm("Vill du rensa skärmen?")) nollstallTillIdag(); }
-        function redigeraPass(dateId) { aktivtDatum = dateId; laddaInDatumTillInputs(dateId, true); document.getElementById('edit-date-banner').classList.remove('hidden'); document.getElementById('edit-date-display').innerText = dateId; switchTab('rit', document.querySelector('button[onclick*="switchTab(\'rit\'"]')); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        function nollstallTillIdag() { aktivtDatum = new Date().toISOString().split('T')[0]; document.getElementById('edit-date-banner').classList.add('hidden'); laddaInDatumTillInputs(aktivtDatum, false); kalenderDatum = new Date(); byggKalender(); }
+        function valjNyOvning() { 
+            const sel = document.getElementById('exercise-selector'); 
+            if (!sel.value) return; 
+            activeExercises.push({ id: Math.random().toString(36).substring(2,7), name: sel.value, metric: "reps", side: "both", sets: [{ reps: 10, weight: 21 }], timestamp: Date.now() }); 
+            sel.value = ""; 
+            renderActiveWorkoutBuilder(); 
+            raknaOmVolym(); 
+            autoSparaData(); 
+        }
+
+        function läggTillSet(exId) { 
+            const ex = activeExercises.find(e => e.id === exId); 
+            if (!ex) return; 
+            const lastSet = ex.sets[ex.sets.length - 1] || { reps: 10, weight: 21 }; 
+            ex.sets.push({ reps: lastSet.reps, weight: lastSet.weight }); 
+            renderActiveWorkoutBuilder(); 
+            raknaOmVolym(); 
+            autoSparaData(); 
+        }
+
+        function taBortSet(exId, setIdx) { 
+            const ex = activeExercises.find(e => e.id === exId); 
+            if (!ex) return; 
+            ex.sets.splice(setIdx, 1); 
+            if (ex.sets.length === 0) activeExercises = activeExercises.filter(e => e.id !== exId); 
+            renderActiveWorkoutBuilder(); 
+            raknaOmVolym(); 
+            autoSparaData(); 
+        }
+
+        function uppdateraSetData(exId, setIdx, fält, värde) { 
+            const ex = activeExercises.find(e => e.id === exId); 
+            if (ex && ex.sets[setIdx]) ex.sets[setIdx][fält] = parseFloat(värde) || 0; 
+            raknaOmVolym(); 
+            autoSparaData(); 
+        }
+
+        function renderActiveWorkoutBuilder() {
+            const container = document.getElementById('active-workout-builder'); 
+            container.innerHTML = "";
+            activeExercises.forEach(ex => {
+                const currentSide = ex.side || "both"; 
+                let card = document.createElement('div'); 
+                card.className = "temple-input-bg border border-[#0d4737] rounded-xl p-3 space-y-2";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-[#0d4737]/60 pb-1">
+                        <span class="text-xs font-mono font-bold text-stone-300 uppercase tracking-wide"><i data-lucide="dumbbell" class="w-3 h-3 inline mr-1"></i> ${ex.name}</span>
+                        <div class="flex items-center gap-1 font-mono text-[9px] font-bold">
+                            <button onclick="window.valjSidaForExercise('${ex.id}', 'left')" class="px-2 py-0.5 rounded ${currentSide === 'left' ? 'bg-amber-600 text-white' : 'temple-bg text-stone-500'}">V</button>
+                            <button onclick="window.valjSidaForExercise('${ex.id}', 'both')" class="px-2 py-0.5 rounded ${currentSide === 'both' ? 'bg-emerald-700 text-white' : 'temple-bg text-stone-500'}">B</button>
+                            <button onclick="window.valjSidaForExercise('${ex.id}', 'right')" class="px-2 py-0.5 rounded ${currentSide === 'right' ? 'bg-amber-600 text-white' : 'temple-bg text-stone-500'}">H</button>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        ${ex.sets.map((set, idx) => `
+                        <div class="flex items-center justify-between bg-[#03241b]/40 p-2 rounded-lg border border-[#0d4737]/30 gap-2 font-mono text-xs">
+                            <span class="text-[10px] text-emerald-700 font-bold">#${idx + 1}</span>
+                            <div class="flex items-center gap-1.5 flex-1 justify-end">
+                                <input type="number" value="${set.reps}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'reps', this.value)" class="w-12 temple-input-bg temple-border rounded text-center py-0.5 text-white focus:outline-none">
+                                <span class="text-[9px] text-stone-500">reps</span>
+                                <input type="number" value="${set.weight}" oninput="window.uppdateraSetData('${ex.id}', ${idx}, 'weight', this.value)" class="w-14 temple-input-bg temple-border rounded text-center py-0.5 text-white focus:outline-none">
+                                <span class="text-[9px] text-stone-500">kg</span>
+                                <button onclick="window.taBortSet('${ex.id}', ${idx})" class="text-stone-600 hover:text-red-400 p-0.5 ml-1"><i data-lucide="x" class="w-3 h-3"></i></button>
+                            </div>
+                        </div>`).join('')}
+                    </div>
+                    <button onclick="window.läggTillSet('${ex.id}')" class="w-full py-1 temple-bg text-stone-400 text-[10px] font-mono rounded-lg border border-[#0d4737] mt-1.5">+ SET</button>`; 
+                container.appendChild(card);
+            }); 
+            lucide.createIcons();
+        }
+
+        function raknaOmVolym() { 
+            let total = 0; 
+            activeExercises.forEach(ex => ex.sets.forEach(s => total += (s.reps*s.weight))); 
+            document.getElementById('live-vol-display').innerText = `${total.toLocaleString('sv-SE')} kg`; 
+        }
+
+        function rensaSkarmForNyDag() { 
+            if(confirm("Vill du rensa skärmen?")) nollstallTillIdag(); 
+        }
+
+        function redigeraPass(dateId) { 
+            aktivtDatum = dateId; 
+            laddaInDatumTillInputs(dateId, true); 
+            document.getElementById('edit-date-banner').classList.remove('hidden'); 
+            document.getElementById('edit-date-display').innerText = dateId; 
+            switchTab('rit', document.querySelector('button[onclick*="switchTab(\'rit\'"]')); 
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+
+        function nollstallTillIdag() { 
+            aktivtDatum = new Date().toISOString().split('T')[0]; 
+            document.getElementById('edit-date-banner').classList.add('hidden'); 
+            laddaInDatumTillInputs(aktivtDatum, false); 
+            kalenderDatum = new Date(); 
+            byggKalender(); 
+        }
+
         function laddaInDatumTillInputs(dateId, tvingaLaddning = false) {
             const pass = logsData.find(l => l.id === dateId);
-            if (pass) { document.getElementById('today-steps').value = pass.steps || ""; activeNotesArray = Array.isArray(pass.notes) ? pass.notes : []; activeImagesArray = Array.isArray(pass.images) ? pass.images : []; pendingImagesQueue = []; document.getElementById('slider-livskraft').value = pass.subjectiveFeel?.energyLevel || 8; document.getElementById('slider-drommar').value = pass.subjectiveFeel?.sleepQuality || 8; document.getElementById('slider-veder').value = pass.subjectiveFeel?.mentalFocus || 9; activeExercises = pass.exercises || []; } 
-            else if (!tvingaLaddning) { document.getElementById('today-steps').value = ""; document.getElementById('today-notes-input').value = ""; activeNotesArray = []; activeExercises = []; activeImagesArray = []; pendingImagesQueue = []; document.getElementById('slider-livskraft').value = 8; document.getElementById('slider-drommar').value = 8; document.getElementById('slider-veder').value = 9; }
-            document.getElementById('val-livskraft').innerText = document.getElementById('slider-livskraft').value; document.getElementById('val-drommar').innerText = document.getElementById('slider-drommar').value; document.getElementById('val-veder').innerText = document.getElementById('slider-veder').value;
-            renderNotesList(); renderImagesList(); renderActiveWorkoutBuilder(); raknaOmVolym();
+            if (pass) { 
+                document.getElementById('today-steps').value = pass.steps || ""; 
+                activeNotesArray = Array.isArray(pass.notes) ? pass.notes : []; 
+                activeImagesArray = Array.isArray(pass.images) ? pass.images : []; 
+                pendingImagesQueue = []; 
+                document.getElementById('slider-livskraft').value = pass.subjectiveFeel?.energyLevel ?? 8; 
+                document.getElementById('slider-drommar').value = pass.subjectiveFeel?.sleepQuality ?? 8; 
+                document.getElementById('slider-veder').value = pass.subjectiveFeel?.mentalFocus ?? 9; 
+                activeExercises = pass.exercises || []; 
+            } else if (!tvingaLaddning) { 
+                document.getElementById('today-steps').value = ""; 
+                document.getElementById('today-notes-input').value = ""; 
+                activeNotesArray = []; 
+                activeExercises = []; 
+                activeImagesArray = []; 
+                pendingImagesQueue = []; 
+                document.getElementById('slider-livskraft').value = 8; 
+                document.getElementById('slider-drommar').value = 8; 
+                document.getElementById('slider-veder').value = 9; 
+            }
+            document.getElementById('val-livskraft').innerText = document.getElementById('slider-livskraft').value; 
+            document.getElementById('val-drommar').innerText = document.getElementById('slider-drommar').value; 
+            document.getElementById('val-veder').innerText = document.getElementById('slider-veder').value;
+            renderNotesList(); 
+            renderImagesList(); 
+            renderActiveWorkoutBuilder(); 
+            raknaOmVolym();
         }
 
-        function toggleCollapseCard(dateId) { collapsedCards[dateId] = !collapsedCards[dateId]; renderJournalboken(); }
-        function raderaPass(dateId) { if (!currentUser || !confirm(`Radera riten för ${dateId} permanent?`)) return; database.ref(`users/${currentUser.uid}/logs/${dateId}`).remove().then(() => { if(db) { db.transaction(["logs"], "readwrite").objectStore("logs").delete(dateId); } if (aktivtDatum === dateId) nollstallTillIdag(); }); }
+        function toggleCollapseCard(dateId) { 
+            if(collapsedCards[dateId] === undefined) {
+                collapsedCards[dateId] = false;
+            } else {
+                collapsedCards[dateId] = !collapsedCards[dateId]; 
+            }
+            renderJournalboken(); 
+        }
+
+        function raderaPass(dateId) { 
+            if (!currentUser || !confirm(`Radera riten för ${dateId} permanent?`)) return; 
+            database.ref(`users/${currentUser.uid}/logs/${dateId}`).remove().then(() => { 
+                if(db) { db.transaction(["logs"], "readwrite").objectStore("logs").delete(dateId); } 
+                if (aktivtDatum === dateId) nollstallTillIdag(); 
+            }); 
+        }
         
         function renderJournalboken() {
-            const anchor = document.getElementById('historical-logs-anchor'); if (!anchor) return; if (logsData.length === 0) { anchor.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Kryptan är tom.</p>"; return; } anchor.innerHTML = "";
-            const manader = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEC"]; const dagarVecka = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
+            const anchor = document.getElementById('historical-logs-anchor'); 
+            if (!anchor) return; 
+            if (logsData.length === 0) { 
+                anchor.innerHTML = "<p class='text-xs font-mono text-stone-600 text-center py-4'>Kryptan är tom.</p>"; 
+                return; 
+            } 
+            anchor.innerHTML = "";
+            const manader = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEC"]; 
+            const dagarVecka = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
+            
             logsData.forEach(log => {
-                let passVolym = 0, rows = "";
-                if (log.exercises) { log.exercises.forEach(ex => { let labels = []; let sideCode = "B"; if(ex.side === "left") sideCode = "V"; if(ex.side === "right") sideCode = "H"; ex.sets?.forEach(s => { passVolym += (s.reps*s.weight); labels.push(`${s.reps} reps x ${s.weight}kg`); }); const sideBadge = sideCode !== 'B' ? `<span class="text-amber-500 border border-amber-500/20 px-1 rounded bg-amber-950/10 text-[9px] font-bold ml-1.5">${sideCode}</span>` : ''; rows += `<div class="py-2.5 border-b border-[#0d4737]/20 last:border-0 font-mono text-xs"><div class="flex justify-between items-center mb-1"><span class="text-white font-black uppercase flex items-center">${ex.name} ${sideBadge}</span></div><div class="flex flex-wrap gap-1.5">${labels.map(l => `<span class="temple-input-bg text-stone-400 px-2 py-1 rounded border border-[#0d4737]/40 text-[11px]">${l}</span>`).join('')}</div></div>`; }); }
-                let isCollapsed = collapsedCards[log.id] !== false; let chevronIkon = isCollapsed ? "chevron-down" : "chevron-up";
-                const parts = log.id.split('-'); const dagNummer = parts[2] || "01"; const manadStr = manader[parseInt(parts[1]) - 1] || "MAJ"; const veckodag = dagarVecka[new Date(log.id).getDay()] || "Måndag";
-                let notesHtml = ""; if(Array.isArray(log.notes)) { log.notes.forEach(n => { let timeLabel = n.timestamp ? new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : ''; notesHtml += `<div class="text-xs text-stone-300 font-sans leading-relaxed mb-2 last:mb-0"><span class="text-stone-500 font-mono text-[10px] mr-2">${timeLabel}</span>${n.text}</div>`; }); }
-                let imagesHtml = ""; if(Array.isArray(log.images) && log.images.length > 0) { imagesHtml = `<div class="grid grid-cols-3 gap-2 mt-2">${log.images.map(img => { let src = typeof img === 'string' ? img : img.url; return `<img src="${src}" class="rounded-lg border border-[#0d4737] object-cover h-16 w-full opacity-80 hover:opacity-100">`; }).join('')}</div>`; }
+                let passVolym = 0;
+                let rows = "";
+                if (log.exercises) { 
+                    log.exercises.forEach(ex => { 
+                        let labels = []; 
+                        let sideCode = "B"; 
+                        if(ex.side === "left") sideCode = "V"; 
+                        if(ex.side === "right") sideCode = "H"; 
+                        if(ex.sets) {
+                            ex.sets.forEach(s => { passVolym += (s.reps*s.weight); labels.push(`${s.reps} reps x ${s.weight}kg`); }); 
+                        }
+                        const sideBadge = sideCode !== 'B' ? `<span class="text-amber-500 border border-amber-500/20 px-1 rounded bg-amber-950/10 text-[9px] font-bold ml-1.5">${sideCode}</span>` : ''; 
+                        rows += `<div class="py-2.5 border-b border-[#0d4737]/20 last:border-0 font-mono text-xs"><div class="flex justify-between items-center mb-1"><span class="text-white font-black uppercase flex items-center">${ex.name} ${sideBadge}</span></div><div class="flex flex-wrap gap-1.5">${labels.map(l => `<span class="temple-input-bg text-stone-400 px-2 py-1 rounded border border-[#0d4737]/40 text-[11px]">${l}</span>`).join('')}</div></div>`; 
+                    }); 
+                }
+                
+                let isCollapsed = collapsedCards[log.id] === undefined ? true : collapsedCards[log.id]; 
+                let chevronIkon = isCollapsed ? "chevron-down" : "chevron-up";
+                
+                const parts = log.id.split('-'); 
+                const dagNummer = parts[2] || "01"; 
+                const manadStr = manader[parseInt(parts[1]) - 1] || "MAJ"; 
+                const veckodag = dagarVecka[new Date(log.id).getDay()] || "Måndag";
+                
+                let notesHtml = ""; 
+                if(Array.isArray(log.notes)) { 
+                    log.notes.forEach(n => { 
+                        let timeLabel = n.timestamp ? new Date(n.timestamp).toLocaleTimeString('sv-SE', {hour: '2-digit', minute:'2-digit'}) : ''; 
+                        notesHtml += `<div class="text-xs text-stone-300 font-sans leading-relaxed mb-2 last:mb-0"><span class="text-stone-500 font-mono text-[10px] mr-2">${timeLabel}</span>${n.text}</div>`; 
+                    }); 
+                }
+                
+                let imagesHtml = ""; 
+                if(Array.isArray(log.images) && log.images.length > 0) { 
+                    imagesHtml = `<div class="grid grid-cols-3 gap-2 mt-2">${log.images.map(img => { 
+                        let src = typeof img === 'string' ? img : img.url; 
+                        return `<img src="${src}" class="rounded-lg border border-[#0d4737] object-cover h-16 w-full opacity-80 hover:opacity-100 cursor-pointer" onclick="event.stopPropagation(); window.openLightbox('${src}')">`; 
+                    }).join('')}</div>`; 
+                }
                 
                 const syncIcon = log.isSynced === false 
                     ? `<span class="text-amber-500 text-[9px] font-mono tracking-wider ml-2">⏳ LOKAL</span>`
                     : `<span class="text-emerald-500 text-[9px] font-mono tracking-wider ml-2">✓ SYNKA</span>`;
 
-                let div = document.createElement('div'); div.className = "temple-bg temple-border rounded-2xl shadow-xl overflow-hidden"; div.id = `log-card-${log.id}`;
-                div.innerHTML = `<div class="p-4 flex justify-between items-center cursor-pointer hover:bg-[#053527]/20 transition-colors" onclick="window.toggleCollapseCard('${log.id}')"><div class="flex items-center gap-3.5"><div class="temple-input-bg temple-border rounded-xl px-2.5 py-1 text-center font-mono w-14"><span class="text-[9px] text-stone-500 uppercase block font-bold tracking-wider">${manadStr}</span><span class="text-lg font-black text-white leading-none block mt-0.5">${dagNummer}</span></div><div><span class="text-sm font-black text-white block">${veckodag} ${syncIcon}</span><span class="text-[9px] font-mono text-stone-400 uppercase tracking-wide flex items-center gap-1.5 mt-0.5">👣 ${log.steps || 0} • 💬 ${log.subjectiveFeel?.energyLevel || 8}/10 • ⚡ ${passVolym.toLocaleString('sv-SE')} kg</span></div></div><div class="flex items-center gap-3 font-mono text-right" onclick="event.stopPropagation();"><button onclick="window.redigeraPass('${log.id}')" class="text-stone-400 hover:text-amber-500 transition-colors mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button><i data-lucide="${chevronIkon}" class="w-5 h-5 text-emerald-500"></i></div></div><div class="${isCollapsed ? 'hidden' : 'p-4 bg-[#021611]/50 border-t border-[#0d4737]/40 space-y-4'}"><div class="grid grid-cols-2 gap-2 font-mono text-xs"><div class="temple-input-bg border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🏋️ Gymvolym</span><span class="text-sm font-black text-emerald-500 block mt-0.5">${passVolym.toLocaleString('sv-SE')} <span class="text-[10px] font-normal text-stone-500">kg</span></span></div><div class="temple-input-bg border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">👣 Vandringslast</span><span class="text-sm font-black text-amber-500 block mt-0.5">${((log.steps || 0) * 60 / 1000).toFixed(1)} <span class="text-[10px] font-normal text-stone-500">ton</span></span></div><div class="temple-input-bg border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🌙 Sömn</span><span class="text-sm font-black text-indigo-400 block mt-0.5">${log.subjectiveFeel?.sleepQuality || 8}/10</span></div><div class="temple-input-bg border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🧠 Inre Weather</span><span class="text-sm font-black text-emerald-400 block mt-0.5">${log.subjectiveFeel?.mentalFocus || 9}/10</span></div></div>${notesHtml || imagesHtml ? `<div class="space-y-1.5"><span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">ANTECKNINGAR & BILDER</span><div class="temple-input-bg border border-[#0d4737]/40 p-3 rounded-xl">${notesHtml}${imagesHtml}</div></div>` : ''}${rows ? `<div class="space-y-1.5"><span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">TRÄNING</span><div class="temple-input-bg border border-[#0d4737]/40 p-3 rounded-xl">${rows}</div></div>` : ''}<div class="flex justify-end pt-1 font-mono text-[9px]" onclick="event.stopPropagation();"><button onclick="window.raderaPass('${log.id}')" class="px-2.5 py-1 bg-red-950/20 hover:bg-red-950 text-red-400 rounded border border-red-900/20 font-bold uppercase transition-all">Radera Riten</button></div></div>`; anchor.appendChild(div);
-            }); lucide.createIcons();
+                let div = document.createElement('div'); 
+                div.className = "temple-bg temple-border rounded-2xl shadow-xl overflow-hidden"; 
+                div.id = `log-card-${log.id}`;
+                
+                div.innerHTML = `
+                    <div class="p-4 flex justify-between items-center cursor-pointer hover:bg-[#053527]/20 transition-colors" onclick="window.toggleCollapseCard('${log.id}')">
+                        <div class="flex items-center gap-3.5">
+                            <div class="temple-input-bg temple-border rounded-xl px-2.5 py-1 text-center font-mono w-14">
+                                <span class="text-[9px] text-stone-500 uppercase block font-bold tracking-wider">${manadStr}</span>
+                                <span class="text-lg font-black text-white leading-none block mt-0.5">${dagNummer}</span>
+                            </div>
+                            <div>
+                                <span class="text-sm font-black text-white block">${veckodag} ${syncIcon}</span>
+                                <span class="text-[9px] font-mono text-stone-400 uppercase tracking-wide flex items-center gap-1.5 mt-0.5">👣 ${log.steps || 0} • 💬 ${log.subjectiveFeel?.energyLevel ?? 8}/12 • ⚡ ${passVolym.toLocaleString('sv-SE')} kg</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 font-mono text-right" onclick="event.stopPropagation();">
+                            <button onclick="window.redigeraPass('${log.id}')" class="text-stone-400 hover:text-amber-500 transition-colors mr-1"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                            <i data-lucide="${chevronIkon}" class="w-5 h-5 text-emerald-500"></i>
+                        </div>
+                    </div>
+                    <div class="${isCollapsed ? 'hidden' : 'p-4 bg-[#021611]/50 border-t border-[#0d4737]/40 space-y-4'}">
+                        <div class="grid grid-cols-2 gap-2 font-mono text-xs">
+                            <div class="temple-input-bg border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🏋️ Gymvolym</span><span class="text-sm font-black text-emerald-500 block mt-0.5">${passVolym.toLocaleString('sv-SE')} <span class="text-[10px] font-normal text-stone-500">kg</span></span></div>
+                            <div class="temple-input-bg border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">👣 Vandringslast</span><span class="text-sm font-black text-amber-500 block mt-0.5">${((log.steps || 0) * 60 / 1000).toFixed(1)} <span class="text-[10px] font-normal text-stone-500">ton</span></span></div>
+                            <div class="temple-input-bg border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🌙 Sömn</span><span class="text-sm font-black text-indigo-400 block mt-0.5">${log.subjectiveFeel?.sleepQuality ?? 8}/12</span></div>
+                            <div class="temple-input-bg border border-[#0d4737]/30 p-2.5 rounded-xl"><span class="text-[9px] text-stone-500 uppercase block tracking-wider">🧠 Inre Weather</span><span class="text-sm font-black text-emerald-400 block mt-0.5">${log.subjectiveFeel?.mentalFocus ?? 9}/12</span></div>
+                        </div>
+                        ${notesHtml || imagesHtml ? `<div class="space-y-1.5"><span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">ANTECKNINGAR & BILDER</span><div class="temple-input-bg border border-[#0d4737]/40 p-3 rounded-xl">${notesHtml}${imagesHtml}</div></div>` : ''}
+                        ${rows ? `<div class="space-y-1.5"><span class="text-[9px] font-mono text-stone-500 uppercase tracking-wider block">TRÄNING</span><div class="temple-input-bg border border-[#0d4737]/40 p-3 rounded-xl">${rows}</div></div>` : ''}
+                        <div class="flex justify-end pt-1 font-mono text-[9px]" onclick="event.stopPropagation();">
+                            <button onclick="window.raderaPass('${log.id}')" class="px-2.5 py-1 bg-red-950/20 hover:bg-red-950 text-red-400 rounded border border-red-900/20 font-bold uppercase transition-all">Radera Riten</button>
+                        </div>
+                    </div>`; 
+                anchor.appendChild(div);
+            }); 
+            lucide.createIcons();
         }
         
-        function beraknaStegStatistik() { let sIdag = 0, sVecka = 0, sManad = 0, sAr = 0, sTotal = 0; const idagStr = new Date().toISOString().split('T')[0]; logsData.forEach(log => { const s = parseInt(log.steps) || 0; sTotal += s; if (log.id === idagStr) sIdag = s; const diff = Math.ceil(Math.abs(new Date() - new Date(log.id)) / (1000 * 60 * 60 * 24)); if (diff <= 7) sVecka += s; if (diff <= 30) sManad += s; if (diff <= 365) sAr += s; }); document.getElementById('steg-idag').innerText = sIdag.toLocaleString('sv-SE'); document.getElementById('steg-vecka').innerText = sVecka.toLocaleString('sv-SE'); document.getElementById('steg-manad').innerText = sManad.toLocaleString('sv-SE'); document.getElementById('steg-ar').innerText = sAr.toLocaleString('sv-SE'); document.getElementById('steg-total').innerText = sTotal.toLocaleString('sv-SE'); }
+        function beraknaStegStatistik() { 
+            let sIdag = 0, sVecka = 0, sManad = 0, sAr = 0, sTotal = 0; 
+            const idagStr = new Date().toISOString().split('T')[0]; 
+            logsData.forEach(log => { 
+                const s = parseInt(log.steps) || 0; 
+                sTotal += s; 
+                if (log.id === idagStr) sIdag = s; 
+                const diff = Math.ceil(Math.abs(new Date() - new Date(log.id)) / (1000 * 60 * 60 * 24)); 
+                if (diff <= 7) sVecka += s; 
+                if (diff <= 30) sManad += s; 
+                if (diff <= 365) sAr += s; 
+            }); 
+            document.getElementById('steg-idag').innerText = sIdag.toLocaleString('sv-SE'); 
+            document.getElementById('steg-vecka').innerText = sVecka.toLocaleString('sv-SE'); 
+            document.getElementById('steg-manad').innerText = sManad.toLocaleString('sv-SE'); 
+            document.getElementById('steg-ar').innerText = sAr.toLocaleString('sv-SE'); 
+            document.getElementById('steg-total').innerText = sTotal.toLocaleString('sv-SE'); 
+        }
 
-        function importeraMasterDataDirekt() { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = function(e) { const file = e.target.files[0]; const reader = new FileReader(); reader.onload = function(evt) { try { const parsed = JSON.parse(evt.target.result); const logs = parsed.logs || parsed; const logArray = Array.isArray(logs) ? logs : Object.values(logs); logArray.forEach(log => { log.isSynced = false; saveToIDB(log); }); alert("LOKAL DATABAS UPPDATERAD MED BACKUP! Synk mot molnet startar i bakgrunden."); location.reload(); } catch(err) { alert("Fel vid tolkning."); } }; reader.readAsText(file); }; input.click(); }
-        function exporteraMasterDataLive() { const output = { profile: { persona: "BEAR", themeColor: "#022c22" }, logs: logsData }; const blob = new Blob([JSON.stringify(output, null, 2)], { type: "application/json" }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `primal_path_gemini_backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); }
-        function rensaIndexedDB() { if(confirm("Vill du rensa den lokala cachen?")) { if(db) { const req = indexedDB.deleteDatabase("PrimalPathDB"); req.onsuccess = () => { alert("Lokal Cache tömd. Templet startar om."); location.reload(); }; } } }
+        function importeraMasterDataDirekt() { 
+            const input = document.createElement('input'); 
+            input.type = 'file'; 
+            input.accept = '.json'; 
+            input.onchange = function(e) { 
+                const file = e.target.files[0]; 
+                const reader = new FileReader(); 
+                reader.onload = function(evt) { 
+                    try { 
+                        const parsed = JSON.parse(evt.target.result); 
+                        const logs = parsed.logs || parsed; 
+                        const logArray = Array.isArray(logs) ? logs : Object.values(logs); 
+                        
+                        logsData = logArray.sort((a,b) => b.id.localeCompare(a.id));
+                        
+                        logArray.forEach(log => { 
+                            log.isSynced = false; 
+                            saveToIDB(log); 
+                        }); 
+                        
+                        uppdateraAllaVyer();
+                        laddaInDatumTillInputs(aktivtDatum, false);
+                        
+                        alert("LOKAL DATABAS UPPDATERAD MED BACKUP! Synk mot molnet startar i bakgrunden."); 
+                        hämtaOchKörKorgSynk();
+                    } catch(err) { 
+                        alert("Fel vid tolkning."); 
+                    } 
+                }; 
+                reader.readAsText(file); 
+            }; 
+            input.click(); 
+        }
 
-        async function skickaChattMeddelande() { const input = document.getElementById('chat-input'); const msg = input.value.trim(); if(!msg) return; const chatBox = document.getElementById('chat-box'); chatBox.innerHTML += `<div class="temple-bg temple-border p-3 rounded-xl text-stone-200 text-right temple-shadow"><span class="text-[9px] text-emerald-400 block uppercase font-bold mb-1">Jonas</span>${msg}</div>`; input.value = ""; chatBox.scrollTop = chatBox.scrollHeight; const loaderId = 'vaktare-load-' + Date.now(); chatBox.innerHTML += `<div id="${loaderId}" class="temple-input-bg temple-border p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500 font-mono text-xs animate-pulse"><span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>Väktaren andas in...</div>`; chatBox.scrollTop = chatBox.scrollHeight; try { const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${firebaseConfig.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: msg }] }], systemInstruction: { parts: [{ text: "Du är Väktaren (Björnen)." }] } }) }); const data = await response.json(); document.getElementById(loaderId).classList.remove('animate-pulse'); let replyText = data.candidates && data.candidates[0] ? data.candidates[0].content.parts[0].text : "Väktaren är tyst."; document.getElementById(loaderId).innerHTML = `<span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>${replyText}`; } catch (err) { document.getElementById(loaderId).innerText = "Anropet blockerades."; } chatBox.scrollTop = chatBox.scrollHeight; }
+        function exporteraMasterDataLive() { 
+            const output = { profile: { persona: "BEAR", themeColor: "#022c22" }, logs: logsData }; 
+            const blob = new Blob([JSON.stringify(output, null, 2)], { type: "application/json" }); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(blob); 
+            a.download = `primal_path_gemini_backup_${new Date().toISOString().split('T')[0]}.json`; 
+            a.click(); 
+        }
+
+        function rensaIndexedDB() { 
+            if(confirm("Vill du rensa den lokala cachen?")) { 
+                if(db) { 
+                    const req = indexedDB.deleteDatabase("PrimalPathDB"); 
+                    req.onsuccess = () => { alert("Lokal Cache tömd. Templet startar om."); location.reload(); }; 
+                } 
+            } 
+        }
+
+        async function skickaChattMeddelande() { 
+            const input = document.getElementById('chat-input'); 
+            const msg = input.value.trim(); 
+            if(!msg) return; 
+            const chatBox = document.getElementById('chat-box'); 
+            chatBox.innerHTML += `<div class="temple-bg temple-border p-3 rounded-xl text-stone-200 text-right temple-shadow"><span class="text-[9px] text-emerald-400 block uppercase font-bold mb-1">Jonas</span>${msg}</div>`; 
+            input.value = ""; 
+            chatBox.scrollTop = chatBox.scrollHeight; 
+            const loaderId = 'vaktare-load-' + Date.now(); 
+            chatBox.innerHTML += `<div id="${loaderId}" class="temple-input-bg temple-border p-3 rounded-xl text-stone-400 border-l-2 border-l-amber-500 font-mono text-xs animate-pulse"><span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>Väktaren andas in...</div>`; 
+            chatBox.scrollTop = chatBox.scrollHeight; 
+            try { 
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${firebaseConfig.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: msg }] }], systemInstruction: { parts: [{ text: "Du är Väktaren (Björnen)." }] } }) }); 
+                const data = await response.json(); 
+                document.getElementById(loaderId).classList.remove('animate-pulse'); 
+                let replyText = data.candidates && data.candidates[0] ? data.candidates[0].content.parts[0].text : "Väktaren är tyst."; 
+                document.getElementById(loaderId).innerHTML = `<span class="text-[9px] text-amber-500 block uppercase font-bold mb-1">Väktaren (Björnen)</span>${replyText}`; 
+            } catch (err) { 
+                document.getElementById(loaderId).innerText = "Anropet blockerades."; 
+            } 
+            chatBox.scrollTop = chatBox.scrollHeight; 
+        }
 
         function renderRoadmap() {
             const container = document.getElementById('roadmap-canvas-wrapper');
@@ -965,12 +1277,55 @@
             document.getElementById('roadmap-modal').classList.add('hidden');
         }
 
-        function switchTab(tabId, btnElem) { document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500')); document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500')); document.getElementById(`view-${tabId}`).classList.add('active'); if(btnElem) { btnElem.classList.remove('text-stone-500'); btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); } lucide.createIcons(); if(tabId === 'rit') window.scrollTo({ top: 0, behavior: 'smooth' }); if(tabId === 'roadmap') renderRoadmap(); }
+        function switchTab(tabId, btnElem) { 
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); 
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-[#0d4737]/40', 'text-amber-500')); 
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-stone-500')); 
+            document.getElementById(`view-${tabId}`).classList.add('active'); 
+            if(btnElem) { 
+                btnElem.classList.remove('text-stone-500'); 
+                btnElem.classList.add('bg-[#0d4737]/40', 'text-amber-500'); 
+            } 
+            lucide.createIcons(); 
+            if(tabId === 'rit') window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            if(tabId === 'roadmap') renderRoadmap(); 
+        }
 
-        window.hanteraAuth = hanteraAuth; window.loggaUt = loggaUt; window.switchTab = switchTab; window.valjNyOvning = valjNyOvning; window.läggTillSet = läggTillSet; window.taBortSet = taBortSet; window.uppdateraSetData = uppdateraSetData; window.sparaDagensRit = sparaDagensRit; window.autoSparaData = autoSparaData; window.importeraMasterDataDirekt = importeraMasterDataDirekt; window.redigeraPass = redigeraPass; window.raderaPass = raderaPass; window.nollstallTillIdag = nollstallTillIdag; window.toggleCollapseCard = toggleCollapseCard; window.valjSidaForExercise = valjSidaForExercise; window.skickaChattMeddelande = skickaChattMeddelande; window.exporteraMasterDataLive = exporteraMasterDataLive; window.laggTillEnskildAnteckning = laggTillEnskildAnteckning; window.taBortEnskildAnteckning = taBortEnskildAnteckning; window.laggBildIKo = laggBildIKo; window.taBortBild = taBortBild; window.sparaBildKo = sparaBildKo; window.rensaIndexedDB = rensaIndexedDB; window.rensaSkarmForNyDag = rensaSkarmForNyDag; window.byggKalender = byggKalender; window.andraManad = andraManad; window.valjKalenderDag = valjKalenderDag;
-        
-        window.oppnaNodModal = oppnaNodModal;
+        function openLightbox(src) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('global-lightbox').classList.remove('hidden');
+        }
+
+        window.hanteraAuth = hanteraAuth; 
+        window.loggaUt = loggaUt; 
+        window.switchTab = switchTab; 
+        window.valjNyOvning = valjNyOvning; 
+        window.läggTillSet = läggTillSet; 
+        window.taBortSet = taBortSet; 
+        window.uppdateraSetData = uppdateraSetData; 
+        window.sparaDagensRit = sparaDagensRit; 
+        window.autoSparaData = autoSparaData; 
+        window.importeraMasterDataDirekt = importeraMasterDataDirekt; 
+        window.redigeraPass = redigeraPass; 
+        window.raderaPass = raderaPass; 
+        window.nollstallTillIdag = nollstallTillIdag; 
+        window.toggleCollapseCard = toggleCollapseCard; 
+        window.valjSidaForExercise = valjSidaForExercise; 
+        window.skickaChattMeddelande = skickaChattMeddelande; 
+        window.exporteraMasterDataLive = exporteraMasterDataLive; 
+        window.laggTillEnskildAnteckning = laggTillEnskildAnteckning; 
+        window.taBortEnskildAnteckning = taBortEnskildAnteckning; 
+        window.laggBildIKo = laggBildIKo; 
+        window.taBortBild = taBortBild; 
+        window.sparaBildKo = sparaBildKo; 
+        window.rensaIndexedDB = rensaIndexedDB; 
+        window.rensaSkarmForNyDag = rensaSkarmForNyDag; 
+        window.byggKalender = byggKalender; 
+        window.andraManad = andraManad; 
+        window.valjKalenderDag = valjKalenderDag;
+        window.oppnaNodModal = oppnaNodModal; 
         window.begarNodStatusAndring = begarNodStatusAndring;
+        window.openLightbox = openLightbox;
 
         lucide.createIcons();
     </script>
